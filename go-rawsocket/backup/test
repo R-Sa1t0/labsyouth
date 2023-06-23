@@ -1,0 +1,79 @@
+package main
+
+import (
+	"encoding/binary"
+	"fmt"
+	"net"
+)
+
+type ip6header struct {
+	version            []byte
+	trafficClass       []byte
+	flowLabel          uint32
+	payloadLength      []byte
+	nextHeader         []byte
+	hopLimit           []byte
+	sourceAddress      net.IP
+	destinationAddress net.IP
+}
+
+type srheader struct {
+	nextHeader   []byte
+	hdrExtLen    []byte
+	routingType  []byte
+	segmentsLeft []byte
+	lastEntry    []byte
+	flags        []byte
+	tag          []byte
+	segments     []net.IP
+}
+
+func main() {
+	fmt.Println("Hello, World!")
+	//make ipv6 header
+	ip6hdr := ip6header{
+		version:            []byte{0x60},
+		trafficClass:       []byte{0x01},
+		flowLabel:          0x00000000,
+		payloadLength:      []byte{0x02, 0xff},
+		nextHeader:         []byte{0x3b},
+		hopLimit:           []byte{0x8f},
+		sourceAddress:      net.ParseIP("2001:db8:0:0:0:0:0:1"),
+		destinationAddress: net.ParseIP("2001:db8:0:0:0:0:0:2"),
+	}
+	fmt.Println("ip6hdr : ", ip6hdr)
+	//make sr header
+	ip6srhdr := srheader{
+		nextHeader:   []byte{0x3b},
+		hdrExtLen:    []byte{0x8b},
+		routingType:  []byte{0x04},
+		segmentsLeft: []byte{0x01},
+		lastEntry:    []byte{0xf9},
+		flags:        []byte{0x01},
+		tag:          []byte{0x01, 0x01},
+		segments:     []net.IP{net.ParseIP("2001:db8:0:0:0:0:0:3"), net.ParseIP("2001:db8:0:0:0:0:0:4")},
+	}
+	fmt.Println("ip6srhdr", ip6srhdr)
+	//make ipv6 packet
+	packet := make([]byte, 300)
+
+	//copy ipv6 header
+	copy(packet[0:40], ip6hdr.version)
+	copy(packet[1:40], ip6hdr.trafficClass)
+	binary.BigEndian.PutUint32(packet[4:40], ip6hdr.flowLabel)
+	copy(packet[8:40], ip6hdr.payloadLength)
+	copy(packet[10:40], ip6hdr.nextHeader)
+	copy(packet[11:40], ip6hdr.hopLimit)
+	copy(packet[12:40], ip6hdr.sourceAddress)
+	copy(packet[28:40], ip6hdr.destinationAddress)
+	//copy sr header
+	copy(packet[40:56], ip6srhdr.nextHeader)
+	copy(packet[41:56], ip6srhdr.hdrExtLen)
+	copy(packet[42:56], ip6srhdr.routingType)
+	copy(packet[43:56], ip6srhdr.segmentsLeft)
+	copy(packet[44:56], ip6srhdr.lastEntry)
+	copy(packet[45:56], ip6srhdr.flags)
+	copy(packet[46:56], ip6srhdr.tag)
+	copy(packet[48:56], ip6srhdr.segments[0])
+	fmt.Println("packet : ", packet)
+}

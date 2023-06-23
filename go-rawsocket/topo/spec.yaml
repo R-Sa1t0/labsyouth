@@ -1,0 +1,32 @@
+nodes:
+  - name: R1
+    type: netns
+    interfaces:
+      - { name: R1-N1, type: direct, args: N1#N1-R1 }
+      - { name: R1-N2, type: direct, args: N2#N2-R1 }
+  - name: N1
+    type: netns
+    interfaces:
+      - { name: N1-R1, type: direct, args: R1#R1-N1 }
+  - name: N2
+    type: netns
+    interfaces:
+      - { name: N2-R1, type: direct, args: R1#R1-N2 }
+
+
+node_configs:
+  - name: R1
+    cmds:
+      - cmd: ip addr add 10.1.1.1/24 dev R1-N1
+      - cmd: ip addr add 10.1.2.1/24 dev R1-N2
+
+  - name: N1
+    cmds:
+      - cmd: ip addr add 10.1.1.2/24 dev N1-R1
+      - cmd: ip route add default via 10.1.1.1
+
+
+  - name: N2
+    cmds:
+      - cmd: ip addr add 10.1.2.2/24 dev N2-R1
+      - cmd: ip route add default via 10.1.2.1
