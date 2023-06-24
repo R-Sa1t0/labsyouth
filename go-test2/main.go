@@ -9,8 +9,8 @@ import (
 )
 
 const (
-	version   = 4  // protocol version
-	headerlen = 20 // header length without extension headers
+	ipversion   = 4  // protocol version
+	ipheaderlen = 20 // header length without extension headers
 )
 
 type headerflags int
@@ -34,15 +34,17 @@ func (h *hdr4) Marshal() ([]byte, error) {
 	if h == nil {
 		return nil, nil
 	}
-	if h.Len < headerlen {
+	if h.Len < ipheaderlen {
 		return nil, fmt.Errorf("header length too small: %d", h.Len)
 	}
-	if h.Version != version {
+	if h.Version != ipversion {
 		return nil, fmt.Errorf("bad version: %d", h.Version)
 	}
-	hdrlen := headerlen + len(h.Options)
+	hdrlen := ipheaderlen + len(h.Options)
 	b := make([]byte, hdrlen)
-	b[0] = byte(version<<4 | (hdrlen >> 2 & 0x0f))
+	// 1. 左に4ビットシフト
+	// 2. 右に2ビットシフト > AND演算で下位4ビットを取得
+	b[0] = byte(ipversion<<4 | (hdrlen >> 2 & 0x0f))
 	b[1] = byte(h.TOS)
 	flagsAndFragOff := (h.FragOff & 0x1fff) | int(h.Flags<<13)
 	binary.BigEndian.PutUint16(b[2:4], uint16(h.TotalLen))
@@ -60,7 +62,7 @@ func (h *hdr4) Marshal() ([]byte, error) {
 		return nil, nil
 	}
 	if len(h.Options) > 0 {
-		copy(b[headerlen:], h.Options)
+		copy(b[ipheaderlen:], h.Options)
 	}
 	return b, nil
 
