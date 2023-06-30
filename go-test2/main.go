@@ -9,8 +9,8 @@ import (
 )
 
 const (
-	ipversion   = 4  // protocol version
-	ipheaderlen = 20 // header length without extension headers
+	ip4version   = 4  // protocol version
+	ip4headerlen = 20 // header length without extension headers
 )
 
 type headerflags int
@@ -34,24 +34,35 @@ func (h *hdr4) Marshal() ([]byte, error) {
 	if h == nil {
 		return nil, nil
 	}
-	if h.Len < ipheaderlen {
+	if h.Len < ip4headerlen {
 		return nil, fmt.Errorf("header length too small: %d", h.Len)
 	}
-	if h.Version != ipversion {
+	if h.Version != ip4version {
 		return nil, fmt.Errorf("bad version: %d", h.Version)
 	}
-	hdrlen := ipheaderlen + len(h.Options)
+	hdrlen := ip4headerlen + len(h.Options)
 	b := make([]byte, hdrlen)
 	// 1. 左に4ビットシフト
 	// 2. 右に2ビットシフト > AND演算で下位4ビットを取得
-	b[0] = byte(ipversion<<4 | (hdrlen >> 2 & 0x0f))
+	// 3. OR演算で結合
+	b[0] = byte(ip4version<<4 | (hdrlen >> 2 & 0x0f))
+	// 最下位ビットは輻輳制御用のフラグ
 	b[1] = byte(h.TOS)
+	// 1. FragOffの下位13ビットを取得
+	// 2. Flagsを13ビット左にシフト(<-?)して、intにする
+	// 3. OR演算で結合
 	flagsAndFragOff := (h.FragOff & 0x1fff) | int(h.Flags<<13)
+	// パケット長を格納 (intの長さは環境依存らしい)
 	binary.BigEndian.PutUint16(b[2:4], uint16(h.TotalLen))
+	// フラグとフラグメントオフセットを格納
 	binary.BigEndian.PutUint16(b[6:8], uint16(flagsAndFragOff))
+	// フラグメンテーションが起きた時用
 	binary.BigEndian.PutUint16(b[4:6], uint16(h.ID))
+	// TTL
 	b[8] = byte(h.TTL)
+	// Protocol
 	b[9] = byte(h.Protocol)
+	// チェックサム
 	binary.BigEndian.PutUint16(b[10:12], uint16(h.Checksum))
 	if ip := h.Src.To4(); ip != nil {
 		copy(b[12:16], ip[:net.IPv4len])
@@ -62,10 +73,9 @@ func (h *hdr4) Marshal() ([]byte, error) {
 		return nil, nil
 	}
 	if len(h.Options) > 0 {
-		copy(b[ipheaderlen:], h.Options)
+		copy(b[ip4headerlen:], h.Options)
 	}
 	return b, nil
-
 }
 
 func main() {
