@@ -1,0 +1,57 @@
+nodes:
+  - name: R1
+    type: netns
+    interfaces:
+      - { name: R1-N1, type: direct, args: N1#N1-R1 }
+      - { name: R1-N2, type: direct, args: N2#N2-R1 }
+  - name: N1
+    type: netns
+    interfaces:
+      - { name: N1-R1, type: direct, args: R1#R1-N1 }
+  - name: N2
+    type: netns
+    interfaces:
+      - { name: N2-R1, type: direct, args: R1#R1-N2 }
+
+
+node_configs:
+  - name: R1
+    cmds:
+      - cmd: ip addr add 10.1.1.1/24 dev R1-N1
+      - cmd: ip addr add 10.1.2.1/24 dev R1-N2
+
+  - name: N1
+    cmds:
+      - cmd: ip addr add 10.1.1.2/24 dev N1-R1
+      - cmd: ip route add default via 10.1.1.1
+
+      - cmd: ip link add n1-vxlan0 type vxlan id 100 local 10.1.1.2 remote 10.1.2.2 dstport 4789
+      - cmd: ip link set dev n1-vxlan0 promisc on
+      - cmd: ip link set n1-vxlan0 up
+
+      - cmd: ip addr add 10.254.1.1/16 dev n1-vxlan0
+
+
+  - name: N2
+    cmds:
+      - cmd: ip addr add 10.1.2.2/24 dev N2-R1
+      - cmd: ip route add default via 10.1.2.1
+      
+      - cmd: ip link add n2-vxlan0 type vxlan id 100 local 10.1.2.2 remote 10.1.1.2 dstport 4789
+      - cmd: ip link set dev n2-vxlan0 promisc on
+      - cmd: ip link set n2-vxlan0 up
+      
+      - cmd: ip addr add 10.254.1.2/16 dev n2-vxlan0
+
+
+
+test:
+  - name: ulay
+    cmds: 
+     - cmd: ip netns exec N1 ping 10.1.2.2 -w 1 -f
+  - name: olay
+    cmds: 
+     - cmd: ip netns exec N1 ping 10.254.1.2 -w 1 -f
+  - name: olay-via-br
+    cmds: 
+     - cmd: ip netns exec N1 ping 10.254.2.2 -w 1 -f

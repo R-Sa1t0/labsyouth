@@ -32,7 +32,6 @@ int main(){
 
     char *payload = packet + sizeof(struct ip6_hdr);
     strcpy(payload, "Hello, World!");
-
     struct sockaddr_in6 dest_addr;
     memset(&dest_addr, 0, sizeof(struct sockaddr_in6));
     dest_addr.sin6_family = AF_INET6;
