@@ -67,6 +67,8 @@ node_configs:
       - cmd: ip link set dev N1-C1 promisc on
       - cmd: ip link set dev N1-C1 up
 
+      - cmd: ip -6 route add fc00:20::2/128 encap seg6local action End.DX2 dev N1-C1 
+
 
   - name: N2
     cmds:
