@@ -10,3 +10,9 @@
      - L2VPNはトンネル先まで含めて同じセグメントになるはず
      - 自分はセグメントAにいる -> 自分が直接接続しているAに対する(遠回りに見える)ip routeは無視されて使われない -> トンネル先にEthernetフレームが届かない
  - 
+
+ - 2018 : https://github.com/tinynetwork/tinet/tree/master/examples/basic_srv6/linux/l2vpn
+     - 動かない
+ - 2018 : https://github.com/tinynetwork/tinet/tree/master/examples/basic_srv6/linux/vpn_v4_per_ce
+     - 動かない
+ - 
