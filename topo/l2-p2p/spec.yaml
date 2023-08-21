@@ -76,7 +76,7 @@ node_configs:
       - cmd: ip link set dev N1-C1 up
       - cmd: ip link set dev N1-C1 address 52:54:00:22:22:22
       - cmd: ip link set dev N1-C1 up
- 
+
 
   - name: N2
     cmds:
