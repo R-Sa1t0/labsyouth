@@ -51,7 +51,7 @@ int main(){
     // srヘッダーの構造体のポインタ = packetの先頭アドレス + ipv6ヘッダーのサイズ (packetにsrヘッダーの構造体を被せる=キャストする)
     struct ipv6_sr_hdr *sr_header = (struct ipv6_sr_hdr *) (buf + sizeof(struct ip6_hdr));
     // "->" : アロー演算子 (構造体の中身にアクセスする)
-    sr_header->nexthdr = IPPROTO_NONE;
+    sr_header->nexthdr = 41;
     // SRHの場合は4
     sr_header->type = 4;
     // セグメントの何番目を使う？
@@ -61,12 +61,13 @@ int main(){
     sr_header->first_segment = 1;
     // 特殊用途だけど普通は0らしい
     sr_header->flags = 0;
-    sr_header->tag = 114514;
-    inet_pton(AF_INET6, "ffff:ffff:ffff:ffff", &(sr_header->segments[0]));
+    sr_header->tag = 0;
+
+    inet_pton(AF_INET6, "fc02::1", &(sr_header->segments[0]));
     // 型が違ってできない　ほんとうはこうやりたい
     // ip6_header->ip6_dst = sr_header->segments[0];
     uint8_t len = 8 + 16 * 1;
-    sr_header->hdrlen = (len >> 3) -1;
+    sr_header->hdrlen = (len >> 3) - 1;
     //bufferにsrヘッダーを入れる
     memcpy(buf + sizeof(struct ip6_hdr), sr_header, sizeof(struct ipv6_sr_hdr));
     
@@ -87,7 +88,7 @@ int main(){
     inet_pton(AF_INET6, "::1", &(dest_addr.sin6_addr));
     
     // sockfdにpacketをバイト
-    if (sendto(sockfd, buf, sizeof(struct ip6_hdr) + sizeof(struct ipv6_sr_hdr), 0, (struct sockaddr *) &dest_addr, sizeof(struct sockaddr_in6)) < 0) {
+    if (sendto(sockfd, buf, sizeof(struct ip6_hdr) + sizeof(struct ipv6_sr_hdr) + 16, 0, (struct sockaddr *) &dest_addr, sizeof(struct sockaddr_in6)) < 0) {
         perror("Failed to send packet");
         exit(1);
     }
