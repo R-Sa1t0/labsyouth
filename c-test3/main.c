@@ -41,7 +41,7 @@ int main(){
     ip6_header->ip6_nxt = IPPROTO_ROUTING;
     ip6_header->ip6_hops = 255;
     ip6_header->ip6_plen = htons(sizeof(struct ipv6_sr_hdr)+16);
-    printf("%d\n",sizeof(struct ipv6_sr_hdr));
+    printf("%lu\n",sizeof(struct ipv6_sr_hdr));
     inet_pton(AF_INET6, "::1", &(ip6_header->ip6_src));
     inet_pton(AF_INET6, "1::1", &(ip6_header->ip6_dst));
     // SRでは、Active Segmentがdest addrになる
