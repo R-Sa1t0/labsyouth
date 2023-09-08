@@ -10,6 +10,4 @@ int main(void){
     printf("Hello!");
     puts("hello!");
     puts("こんにちは");
-
-    return 0;
 }
