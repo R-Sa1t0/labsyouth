@@ -6,15 +6,15 @@ int main(){
     printf("x : %d\n", x);
     printf("y : %d\n", y);
     printf("z : %g\n", z);
-printf("\n");
+puts("");
     int radius = 2;
     double pi = 3.14;
     printf("%g\n", radius*radius*pi);
-printf("\n");
+puts("");
     int price_food=980, price_drink=430;
     double discount_rate=0.3;
     printf("%g\n", (price_food+price_drink)*(1-discount_rate));
-printf("\n");
+puts("");
     {
         int x = 1;
         printf("x : %d\n", x);
@@ -23,6 +23,6 @@ printf("\n");
         int x = 2;
         printf("x : %d\n", x);
     }
-printf("\n");
+puts("");
 
 }

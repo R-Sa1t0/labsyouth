@@ -8,12 +8,12 @@ int main(){
         printf("x1 : %d\n", x1);
     }
     printf("x1 : %d\n", x1);
-printf("\n");
+puts("");
     printf("%lu\n", sizeof(short));
     printf("%lu\n", sizeof(int));
     printf("%lu\n", sizeof(long));
     printf("%lu\n", sizeof(long long));
-printf("\n");
+puts("");
     {
         short x = 10000;
         int y = 100000000;
@@ -21,16 +21,16 @@ printf("\n");
         printf("%d\n", x);
         printf("%d\n", y);
         printf("%lld\n", z);
-printf("\n");
+puts("");
     printf("%d\n", x+y);
     printf("%lld\n", y+z);
     printf("%lld\n", z+x);
     }
-printf("\n");
+puts("");
     printf("%lld\n", sizeof(float));
     printf("%lld\n", sizeof(double));
     printf("%lld\n", sizeof(long double));
-printf("\n");
+puts("");
     {
         float x = 1/3.0;
         double y = 1/3.0;
