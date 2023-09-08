@@ -39,5 +39,4 @@ int main(void){
     printf("%-6s %6d %7.2f\n", "silver", 47, 10.49);
     printf("%-6s %6d %7.2f\n", "copper", 29, 8.94);
     printf("%-6s %6d %7.2f\n", "iron", 26, 7.87);
-    return 0;
 }

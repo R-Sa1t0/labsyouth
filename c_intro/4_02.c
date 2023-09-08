@@ -61,7 +61,4 @@ printf("\n");
     printf("%4d\n", 100>>6);
     printf("%4d\n", 100>>7);
     printf("%4d\n", 100>>8);
-
-
-    return 0;
 }
