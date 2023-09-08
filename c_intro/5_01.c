@@ -24,16 +24,5 @@ printf("\n");
         printf("x : %d\n", x);
     }
 printf("\n");
-    int x1 = 123;
-    printf("x1 : %d\n", x1);
-    {
-        int x1 = 456;
-        printf("x1 : %d\n", x1);
-    }
-    printf("x1 : %d\n", x1);
-printf("\n");
-    printf("%lu\n", sizeof(short));
-    printf("%lu\n", sizeof(int));
-    printf("%lu\n", sizeof(long));
-    printf("%lu\n", sizeof(long long));
+
 }
