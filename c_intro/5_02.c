@@ -39,4 +39,44 @@ puts("");
         printf("%.40f\n", y);
         printf("%.40Lf\n", z);
     }
+puts("");
+    {
+        int doller = 100, rate = 105;
+        printf("%d\n", doller * rate);
+        rate=115;
+        printf("%d\n", doller * rate);
+    }
+puts("");
+    {
+        int x = 1/2.0;
+        printf("%d\n", x);
+        x = 3/2.0;
+        printf("%d\n", x);
+    }
+puts("");
+    {
+        double component = 1;
+        component*=1.4;
+        printf("%g\n", component);
+        component*=1.4;
+        printf("%g\n", component);
+        component*=1.4;
+        printf("%g\n", component);
+        component*=1.4;
+        printf("%g\n", component);
+        component*=1.4;
+        printf("%g\n", component);
+        component*=1.4;
+        printf("%g\n", component);
+        component*=1.4;
+        printf("%g\n", component);
+        component*=1.4;
+        printf("%g\n", component);
+    }
+puts("");
+    {
+        int x;
+        printf("%d\n", x=123);
+        printf("%d\n", x);
+    }
 }
