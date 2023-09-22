@@ -31,6 +31,29 @@ int main(){
         puts("");
     }
     {
-        
+        int i;
+        for (i=0; i<10; i++) printf("%d", i);
+        puts("");
+    }
+    {
+        int i=123;
+        for (i++; i=0; i<10) printf("%d", i);
+        puts("");
+    }
+    {
+        int i=123;
+        for (i<10; i++; i=0) printf("%d", i);
+        puts("");
+    }
+    {
+        int i=123;
+        // 無限ループする
+        //for (i<10; ++i; i=0) printf("%d", i);
+        puts("");
+    }
+    {
+        int count = 10;
+        while(--count>=0) printf("hello ");
+        puts("");
     }
 }
