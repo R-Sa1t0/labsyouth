@@ -54,9 +54,5 @@ int main(){
     printf("%d\n", gcd2(36, 28));
     printf("%d\n", gcd2(12345, 68790));
     printf("%d\n", gcd2(12345, 0));
-
-    puts("");
     
-    printf("%d\n", sum(2,3,4));
-    printf("%d\n", sum(3,123,456,789));
 }
