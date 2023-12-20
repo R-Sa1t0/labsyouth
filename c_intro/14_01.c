@@ -13,6 +13,4 @@ int main(int argc, char* argv[]){
     for (int i=1; i<argc; i++) total+=atoi(argv[i]);
     printf("total : %d\n", total);
     printf("average : %g\n", (double)total/(argc-1));
-
-    
 }
