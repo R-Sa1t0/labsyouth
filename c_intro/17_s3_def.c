@@ -18,7 +18,7 @@ void ext_end(void){
 }
 
 static void add_ext(char* path){
-    char* file = strrchr(path, '.');
+    char* file = strrchr(path, '/');
     if (file) file++; else file = path;
     
     char* ext=strrchr(file, '.');
@@ -69,7 +69,7 @@ void ext_find_files(char* path){
 void ext_report(void){
     printf("%-14s %14s %14s %14s\n", "ext", "count", "size(total)", "size(average)");
     for(int i=0; i<ext_n; i++){
-        EXT* p = &ext_p[i];
+        EXT* p =&ext_p[i];
         printf("%-14s %14ld %14ld %14ld\n", p->ext, p->count, p->size, p->size/p->count);
     }
     puts("");
