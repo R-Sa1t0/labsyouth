@@ -62,8 +62,8 @@ node_configs:
       - cmd: ip link add n1-vrf0 type vrf table 10
       - cmd: ip link set dev n1-vrf0 up
       - cmd: ip link set dev N1-C1 master n1-vrf0
-      - cmd: ip addr add 10.0.1.1/24 dev N1-C1
       # lwt setup
+      - cmd: ip addr add 10.0.1.1/24 dev N1-C1
       # decap (End.DT4)
       - cmd: ip -6 route add fc00:11::1/128 encap seg6local action End.DT4 vrftable 10 dev n1-vrf0
       # encap (End.DX4)
@@ -77,8 +77,8 @@ node_configs:
       - cmd: ip link add n2-vrf0 type vrf table 10
       - cmd: ip link set dev n2-vrf0 up
       - cmd: ip link set dev N2-C2 master n2-vrf0
-      - cmd: ip addr add 10.0.2.1/24 dev N2-C2
       # lwt setup
+      - cmd: ip addr add 10.0.2.1/24 dev N2-C2
       # decap (End.DT4)
       - cmd: ip -6 route add fc00:12::1/128 encap seg6local action End.DT4 vrftable 10 dev n2-vrf0
       # encap (End.DX4)
