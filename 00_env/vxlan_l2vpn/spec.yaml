@@ -4,54 +4,55 @@ nodes:
     interfaces:
       - { name: R1-N1, type: direct, args: N1#N1-R1 }
       - { name: R1-N2, type: direct, args: N2#N2-R1 }
+    sysctls:
+      - sysctl: net.ipv6.conf.all.forwarding=1
+      - sysctl: net.ipv6.conf.default.forwarding=1
+      - sysctl: net.ipv6.conf.default.disable_ipv6=0
+      - sysctl: net.ipv6.conf.all.rp_filter=0
   - name: N1
     type: netns
     interfaces:
       - { name: N1-R1, type: direct, args: R1#R1-N1 }
+      - { name: N1-C1, type: direct, args: C1#C1-N1 }
   - name: N2
     type: netns
     interfaces:
       - { name: N2-R1, type: direct, args: R1#R1-N2 }
+      - { name: N2-C2, type: direct, args: C2#C2-N2 }
+  - name: C1
+    type: netns
+    interfaces:
+      - { name: C1-N1, type: direct, args: N1#N1-C1 }
+  - name: C2
+    type: netns
+    interfaces:
+      - { name: C2-N2, type: direct, args: N2#N2-C2 }
 
 
 node_configs:
   - name: R1
     cmds:
-      - cmd: ip addr add 10.1.1.1/24 dev R1-N1
-      - cmd: ip addr add 10.1.2.1/24 dev R1-N2
+      - cmd: ip -6 addr add fc00:1::1/96 dev R1-N1
+      - cmd: ip -6 addr add fc00:2::1/96 dev R1-N2
 
   - name: N1
     cmds:
-      - cmd: ip addr add 10.1.1.2/24 dev N1-R1
-      - cmd: ip route add default via 10.1.1.1
+      - cmd: ip -6 addr add fc00:1::2/96 dev N1-R1
+      - cmd: ip -6 route add default via fc00:1::1
 
-      - cmd: ip link add n1-vxlan0 type vxlan id 100 local 10.1.1.2 remote 10.1.2.2 dstport 4789
+      - cmd: ip link add n1-vxlan0 type vxlan id 100 local fc00:1::2 remote fc00:2::2 dstport 4789
       - cmd: ip link set dev n1-vxlan0 promisc on
       - cmd: ip link set n1-vxlan0 up
 
       - cmd: ip addr add 10.254.1.1/16 dev n1-vxlan0
 
-
   - name: N2
     cmds:
-      - cmd: ip addr add 10.1.2.2/24 dev N2-R1
-      - cmd: ip route add default via 10.1.2.1
+      - cmd: ip -6 addr add fc00:2::2/96 dev N2-R1
+      - cmd: ip -6 route add default via fc00:2::1
       
-      - cmd: ip link add n2-vxlan0 type vxlan id 100 local 10.1.2.2 remote 10.1.1.2 dstport 4789
+      - cmd: ip link add n2-vxlan0 type vxlan id 100 local fc00:2::2 remote fc00:1::2 dstport 4789
       - cmd: ip link set dev n2-vxlan0 promisc on
       - cmd: ip link set n2-vxlan0 up
       
       - cmd: ip addr add 10.254.1.2/16 dev n2-vxlan0
-
-
-
-test:
-  - name: ulay
-    cmds: 
-     - cmd: ip netns exec N1 ping 10.1.2.2 -w 1 -f
-  - name: olay
-    cmds: 
-     - cmd: ip netns exec N1 ping 10.254.1.2 -w 1 -f
-  - name: olay-via-br
-    cmds: 
-     - cmd: ip netns exec N1 ping 10.254.2.2 -w 1 -f
