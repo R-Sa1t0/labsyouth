@@ -66,7 +66,7 @@ node_configs:
       - cmd: ip addr add 10.0.1.1/24 dev N1-C1
       # decap (End.DT4)
       - cmd: ip -6 route add fc00:11::1/128 encap seg6local action End.DT4 vrftable 10 dev n1-vrf0
-      # encap (End.DX4)
+      # encap
       - cmd: ip route add 10.0.2.0/24 encap seg6 mode encap segs fc00:12::1 dev N1-R1
 
   - name: N2
@@ -81,7 +81,7 @@ node_configs:
       - cmd: ip addr add 10.0.2.1/24 dev N2-C2
       # decap (End.DT4)
       - cmd: ip -6 route add fc00:12::1/128 encap seg6local action End.DT4 vrftable 10 dev n2-vrf0
-      # encap (End.DX4)
+      # encap
       - cmd: ip route add 10.0.1.0/24 encap seg6 mode encap segs fc00:11::1 dev N2-R1
   
   - name: C1
