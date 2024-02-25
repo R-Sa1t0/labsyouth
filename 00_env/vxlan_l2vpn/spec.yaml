@@ -44,7 +44,11 @@ node_configs:
       - cmd: ip link set dev n1-vxlan0 promisc on
       - cmd: ip link set n1-vxlan0 up
 
-      - cmd: ip addr add 10.254.1.1/16 dev n1-vxlan0
+      - cmd: ip link add n1-br0 type bridge
+      - cmd: ip link set dev n1-br0 up
+      - cmd: ip link set dev N1-C1 master n1-br0
+      - cmd: ip link set dev n1-vxlan0 master n1-br0
+
 
   - name: N2
     cmds:
@@ -54,5 +58,18 @@ node_configs:
       - cmd: ip link add n2-vxlan0 type vxlan id 100 local fc00:2::2 remote fc00:1::2 dstport 4789
       - cmd: ip link set dev n2-vxlan0 promisc on
       - cmd: ip link set n2-vxlan0 up
+
+      - cmd: ip link add n2-br0 type bridge
+      - cmd: ip link set dev n2-br0 up
+      - cmd: ip link set dev N2-C2 master n2-br0
+      - cmd: ip link set dev n2-vxlan0 master n2-br0
       
-      - cmd: ip addr add 10.254.1.2/16 dev n2-vxlan0
+  - name: C1
+    cmds:
+      - cmd: ip addr add 10.254.1.1/16 dev C1-N1
+      - cmd: ip link set dev C1-N1 up
+  
+  - name: C2
+    cmds:
+      - cmd: ip addr add 10.254.1.2/16 dev C2-N2
+      - cmd: ip link set dev C2-N2 up
