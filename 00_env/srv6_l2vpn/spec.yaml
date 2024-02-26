@@ -1,0 +1,105 @@
+nodes:
+  - name: R1
+    type: netns
+    interfaces:
+      - { name: R1-N1, type: direct, args: N1#N1-R1 }
+      - { name: R1-N2, type: direct, args: N2#N2-R1 }
+    sysctls:
+      - sysctl: net.ipv6.conf.all.forwarding=1
+      - sysctl: net.ipv6.conf.all.rp_filter=0
+      - sysctl: net.ipv6.conf.default.forwarding=1
+      - sysctl: net.ipv6.conf.default.disable_ipv6=0
+  - name: N1
+    type: netns
+    interfaces:
+      - { name: N1-R1, type: direct, args: R1#R1-N1 }
+      - { name: N1-C1, type: direct, args: C1#C1-N1 }
+    sysctls:
+      - sysctl: net.ipv6.conf.all.rp_filter=0
+      - sysctl: net.ipv6.conf.all.forwarding=1
+      - sysctl: net.ipv6.conf.all.disable_ipv6=0
+      - sysctl: net.ipv6.conf.default.forwarding=1
+      - sysctl: net.ipv6.conf.default.disable_ipv6=0
+      - sysctl: net.ipv6.conf.default.seg6_enabled=1
+  - name: N2
+    type: netns
+    interfaces:
+      - { name: N2-R1, type: direct, args: R1#R1-N2 }
+      - { name: N2-C2, type: direct, args: C2#C2-N2 }
+    sysctls:
+      - sysctl: net.ipv6.conf.all.rp_filter=0
+      - sysctl: net.ipv6.conf.all.forwarding=1
+      - sysctl: net.ipv6.conf.all.disable_ipv6=0
+      - sysctl: net.ipv6.conf.default.forwarding=1
+      - sysctl: net.ipv6.conf.default.disable_ipv6=0
+      - sysctl: net.ipv6.conf.default.seg6_enabled=1
+  - name: C1
+    type: netns
+    interfaces:
+      - { name: C1-N1, type: direct, args: N1#N1-C1 }
+  - name: C2
+    type: netns
+    interfaces:
+      - { name: C2-N2, type: direct, args: N2#N2-C2 }
+
+
+node_configs:
+  - name: R1
+    cmds:
+      - cmd: ip -6 addr add fc00:1::1/96 dev R1-N1
+      - cmd: ip -6 addr add fc00:2::1/96 dev R1-N2
+      # for sid
+      - cmd: ip -6 route add fc00:11::/96 via fc00:1::2
+      - cmd: ip -6 route add fc00:12::/96 via fc00:2::2
+
+
+  - name: N1
+    cmds:
+      - cmd: ip -6 addr add fc00:1::2/96 dev N1-R1
+      - cmd: ip -6 route add default via fc00:1::1
+      - cmd: ip link set dev N1-R1 up
+      - cmd: ip link set dev N1-C1 up
+      # bridge setup
+      - cmd: ip link add n1-br0 type bridge
+      - cmd: ip link set dev n1-br0 up
+      - cmd: ip link set dev N1-C1 master n1-br0
+      # lwt setup
+      # decap (End.DX2)
+      - cmd: ip -6 route add fc00:11::1/128 encap seg6local action End.DX2 oif n1-br0 dev n1-br0
+      # encap 
+      - cmd: ip route add 10.0.1.0/24 encap seg6 mode l2encap segs fc00:12::1 dev N1-R1
+      # hack!
+      #- cmd: ip link set dev N1-C1 address 52:54:00:22:22:22
+
+
+  - name: N2
+    cmds:
+      - cmd: ip -6 addr add fc00:2::2/96 dev N2-R1
+      - cmd: ip -6 route add default via fc00:2::1
+      - cmd: ip link set dev N2-R1 up
+      - cmd: ip link set dev N2-C2 up
+      # bridge setup
+      - cmd: ip link add n2-br0 type bridge
+      - cmd: ip link set dev n2-br0 up
+      - cmd: ip link set dev N2-C2 master n2-br0
+      # lwt setup
+      # decap (End.DX2)
+      - cmd: ip -6 route add fc00:12::1/128 encap seg6local action End.DX2 oif n2-br0 dev n2-br0
+      # encap
+      - cmd: ip route add 10.0.1.0/24 encap seg6 mode l2encap segs fc00:11::1 dev N2-R1
+      # hack!
+      #- cmd: ip link set dev N2-C2 address 52:54:00:11:11:11
+
+  - name: C1
+    cmds:
+      #- cmd: ip link set C1-N1 address 52:54:00:11:11:11
+      - cmd: ip link set C1-N1 up
+      - cmd: ip addr add 10.0.1.1/24 dev C1-N1
+      #- cmd: ip nei replace 10.0.1.2 lladdr 52:54:00:22:22:22 dev C1-N1
+
+  - name: C2
+    cmds:
+      #- cmd: ip link set C2-N2 address 52:54:00:22:22:22
+      - cmd: ip link set C2-N2 up
+      - cmd: ip addr add 10.0.1.2/24 dev C2-N2
+      #- cmd: ip nei replace 10.0.1.1 lladdr 52:54:00:11:11:11 dev C2-N2
