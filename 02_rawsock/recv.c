@@ -24,10 +24,17 @@ void packet_processing(unsigned char *buf, ssize_t len){
     // ipv6 next header is not 43 (routing header), return
     if (buf[20] != 43) return;
 
-    printf("Received SRv6 Packet! (%ld bytes)\n", len);
-    for(int i=0; i<len; i++){
-        printf("%02x ", buf[i]);
+    // print sid
+    unsigned char sid[16];
+    for(int i=0; i<16; i++){
+        sid[i] = buf[14+40+8+i];
     }
+    printf("Received SRv6 Packet! (%ld bytes)\n", len);
+    printf("SID: ");
+    for(int i=0; i<16; i++){
+        printf("%02x ", sid[i]);
+    }
+    
     printf("\n\n");
 }
 
