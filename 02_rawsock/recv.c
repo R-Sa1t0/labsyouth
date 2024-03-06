@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
+#include <stdint.h>
 #include <linux/if_ether.h> // for ETH_P_ALL
 
 int mac_check(int offset, unsigned char *buf, unsigned char *mac){
@@ -25,7 +26,7 @@ void packet_processing(unsigned char *buf, ssize_t len){
     if (buf[20] != 43) return;
 
     // print sid
-    unsigned char sid[16];
+    uint8_t sid[16];
     for(int i=0; i<16; i++){
         sid[i] = buf[14+40+8+i];
     }
@@ -33,6 +34,10 @@ void packet_processing(unsigned char *buf, ssize_t len){
     printf("SID: ");
     for(int i=0; i<16; i++){
         printf("%02x ", sid[i]);
+    }
+    puts("");
+    for (int i=0; i<len; i++){
+        printf("%02x ", buf[i]);
     }
     
     printf("\n\n");
