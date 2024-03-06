@@ -1,44 +1,49 @@
 nodes:
   - name: R1
-    type: netns
+    image: nicolaka/netshoot
+    docker_run_extra_args: --entrypoint bash
     interfaces:
       - { name: R1-N1, type: direct, args: N1#N1-R1 }
       - { name: R1-N2, type: direct, args: N2#N2-R1 }
     sysctls:
       - sysctl: net.ipv6.conf.all.forwarding=1
-      - sysctl: net.ipv6.conf.all.rp_filter=0
+      - sysctl: net.ipv4.conf.all.rp_filter=0
       - sysctl: net.ipv6.conf.default.forwarding=1
       - sysctl: net.ipv6.conf.default.disable_ipv6=0
   - name: N1
-    type: netns
+    image: nicolaka/netshoot
+    docker_run_extra_args: --entrypoint bash
     interfaces:
       - { name: N1-R1, type: direct, args: R1#R1-N1 }
       - { name: N1-C1, type: direct, args: C1#C1-N1 }
     sysctls:
-      - sysctl: net.ipv6.conf.all.rp_filter=0
+      - sysctl: net.ipv4.conf.all.rp_filter=0
       - sysctl: net.ipv6.conf.all.forwarding=1
       - sysctl: net.ipv6.conf.all.disable_ipv6=0
       - sysctl: net.ipv6.conf.default.forwarding=1
       - sysctl: net.ipv6.conf.default.disable_ipv6=0
       - sysctl: net.ipv6.conf.default.seg6_enabled=1
   - name: N2
-    type: netns
+    image: nicolaka/netshoot
+    docker_run_extra_args: --entrypoint bash
     interfaces:
       - { name: N2-R1, type: direct, args: R1#R1-N2 }
       - { name: N2-C2, type: direct, args: C2#C2-N2 }
     sysctls:
-      - sysctl: net.ipv6.conf.all.rp_filter=0
+      - sysctl: net.ipv4.conf.all.rp_filter=0
       - sysctl: net.ipv6.conf.all.forwarding=1
       - sysctl: net.ipv6.conf.all.disable_ipv6=0
       - sysctl: net.ipv6.conf.default.forwarding=1
       - sysctl: net.ipv6.conf.default.disable_ipv6=0
       - sysctl: net.ipv6.conf.default.seg6_enabled=1
   - name: C1
-    type: netns
+    image: nicolaka/netshoot
+    docker_run_extra_args: --entrypoint bash
     interfaces:
       - { name: C1-N1, type: direct, args: N1#N1-C1 }
   - name: C2
-    type: netns
+    image: nicolaka/netshoot
+    docker_run_extra_args: --entrypoint bash
     interfaces:
       - { name: C2-N2, type: direct, args: N2#N2-C2 }
 
@@ -52,6 +57,9 @@ node_configs:
       - cmd: ip -6 route add fc00:11::/96 via fc00:1::2
       - cmd: ip -6 route add fc00:12::/96 via fc00:2::2
 
+      - cmd: ip link set R1-N2 down
+      - cmd: ip link set R1-N2 address 5e:93:21:63:f5:cd
+      - cmd: ip link set R1-N2 up
 
   - name: N1
     cmds:
