@@ -1,0 +1,19 @@
+nodes:
+  - name: N1
+    type: netns
+    interfaces:
+      - { name: N1-N2, type: direct, args: N2#N2-N1 }
+  - name: N2
+    type: netns
+    interfaces:
+      - { name: N2-N1, type: direct, args: N1#N1-N2 }
+
+
+node_configs:
+  - name: N1
+    cmds:
+      - cmd: ip -6 addr add fc00:1::1/64 dev N1-N2
+
+  - name: N2
+    cmds:
+      - cmd: ip -6 addr add fc00:1::2/64 dev N2-N1
