@@ -137,13 +137,13 @@ int main() {
     char udp_src_port[] = {0x1f, 0x90};
     add_bytestobuf(112, 2, pbuf, udp_src_port);
     // dst port (46550)
-    char udp_dst_port[] = {0xb5, 0xd6};
+    char udp_dst_port[] = {0xe5, 0xc8};
     add_bytestobuf(114, 2, pbuf, udp_dst_port);
     // length (14)
     char udp_len[] = {0x00, 0x0e};
     add_bytestobuf(116, 2, pbuf, udp_len);
     // checksum (0)
-    char udp_checksum[] = {0x16, 0x22};
+    char udp_checksum[] = {0x00, 0x00};
     add_bytestobuf(118, 2, pbuf, udp_checksum);
     // payload (わざとtypo)
     char payload[] = {0x48, 0x41, 0x4c, 0x4c, 0x4f, 0x0a};

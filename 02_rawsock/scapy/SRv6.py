@@ -8,7 +8,7 @@ def send_ipv6_packet():
         Ether(src="52:54:00:22:22:22", dst="52:54:00:11:11:11") /
         IP(src="10.0.1.2", dst="10.0.1.1") /
         UDP(sport=8080, dport=46550) /
-        Raw("HELLO scapy2")
+        Raw("HALLO")
     )
     sendp(packet, iface="N2-R1")
 
