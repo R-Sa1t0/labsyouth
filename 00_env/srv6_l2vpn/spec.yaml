@@ -6,7 +6,7 @@ nodes:
       - { name: R1-N2, type: direct, args: N2#N2-R1 }
     sysctls:
       - sysctl: net.ipv6.conf.all.forwarding=1
-      - sysctl: net.ipv6.conf.all.rp_filter=0
+      - sysctl: net.ipv4.conf.all.rp_filter=0
       - sysctl: net.ipv6.conf.default.forwarding=1
       - sysctl: net.ipv6.conf.default.disable_ipv6=0
   - name: N1
@@ -15,7 +15,7 @@ nodes:
       - { name: N1-R1, type: direct, args: R1#R1-N1 }
       - { name: N1-C1, type: direct, args: C1#C1-N1 }
     sysctls:
-      - sysctl: net.ipv6.conf.all.rp_filter=0
+      - sysctl: net.ipv4.conf.all.rp_filter=0
       - sysctl: net.ipv6.conf.all.forwarding=1
       - sysctl: net.ipv6.conf.all.disable_ipv6=0
       - sysctl: net.ipv6.conf.default.forwarding=1
@@ -27,7 +27,7 @@ nodes:
       - { name: N2-R1, type: direct, args: R1#R1-N2 }
       - { name: N2-C2, type: direct, args: C2#C2-N2 }
     sysctls:
-      - sysctl: net.ipv6.conf.all.rp_filter=0
+      - sysctl: net.ipv4.conf.all.rp_filter=0
       - sysctl: net.ipv6.conf.all.forwarding=1
       - sysctl: net.ipv6.conf.all.disable_ipv6=0
       - sysctl: net.ipv6.conf.default.forwarding=1
