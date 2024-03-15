@@ -125,7 +125,7 @@ int main() {
 
     // Overlay L3 Header (IPv4)
     // version, IHL, DSCP, ECN
-    uint8_t overlay_vihl[] = {0x45};
+    uint8_t overlay_vihl[] = {0x45, 0x00};
     buffer_append(&pbuf, overlay_vihl, sizeof overlay_vihl);
     // total length (40)
     uint8_t overlay_total_len[] = {0x00, 0x22};
