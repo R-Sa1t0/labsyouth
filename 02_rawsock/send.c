@@ -121,7 +121,7 @@ int main() {
     buffer_append(&pbuf, overlay_eth_src_mac, sizeof overlay_eth_src_mac);
     // ethertype (IP)
     uint8_t overlay_ethertype[] = {0x08, 0x00};
-    buffer_append(&pbuf, overlay_eth_src_mac, sizeof overlay_eth_src_mac);
+    buffer_append(&pbuf, overlay_ethertype, sizeof overlay_ethertype);
 
     // Overlay L3 Header (IPv4)
     // version, IHL, DSCP, ECN
