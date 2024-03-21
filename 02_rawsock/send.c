@@ -10,6 +10,8 @@
 #include <net/if.h> // if_nametoindex()
 
 #include <net/ethernet.h>  //ethernet
+#include <netinet/ip6.h>
+#include <linux/in6.h> // IPPROTO_ROUTING
 
 // charは最大値が127までしか保証されてないので，uint8_tを使う
 #define BUFFER_SIZE 1500
@@ -39,11 +41,11 @@ void buffer_print(Buffer *buf){
 
 int main() {
     Buffer pbuf;
+    Buffer pbuf1;
     //uint8_t pbuf[126];
     buffer_init(&pbuf);
 
     // L2 (Ethernet) header
-    /*
     // dst addr (5e:93:21:63:f5:cd)
     uint8_t eth_dst_mac[] = {0x5e, 0x93, 0x21, 0x63, 0xf5, 0xcd};
     buffer_append(&pbuf, eth_dst_mac, sizeof eth_dst_mac);
@@ -53,28 +55,27 @@ int main() {
     // ethertype (IPv6)
     uint8_t ethertype[] = {0x86, 0xdd};
     buffer_append(&pbuf, ethertype, sizeof ethertype);    
-    */
+    // 
     struct ether_header eth_hdr = {
         {0x5e, 0x93, 0x21, 0x63, 0xf5, 0xcd}, // dst
         {0x52, 0xb3, 0x7d, 0x78, 0x93, 0x61}, // src
         htons(ETHERTYPE_IPV6) // ethertype
     };
-    buffer_append(&pbuf,(uint8_t *)&eth_hdr, sizeof(eth_hdr));
+    buffer_append(&pbuf1,(uint8_t *)&eth_hdr, sizeof(eth_hdr));
     //for (int i=0; i<sizeof(eth_hdr); i++) printf("%02x ", ((uint8_t *)&eth_hdr)[i]);
     //puts("");
-    //buffer_print(&pbuf);
 
     // L3 (IPv6) header
     // version, traffic class, flow label
     uint8_t vtcfl[] = {0x60, 0x00, 0x00, 0x00};
     buffer_append(&pbuf, vtcfl, sizeof vtcfl);
-    // payload length (78)
+    // payload length (72)
     uint8_t payload_len[] = {0x00, 0x48};
     buffer_append(&pbuf, payload_len, sizeof payload_len);
     // next header (SRv6: 43)
     uint8_t next_hdr[] = {0x2b};
     buffer_append(&pbuf, next_hdr, sizeof next_hdr);
-    // hop limit (64)
+    // hop limit (63)
     uint8_t hop_limit[] = {0x3f};
     buffer_append(&pbuf, hop_limit, sizeof hop_limit);
     // src addr (fc00:2::2 / fc00:2:0:0:0:0:0:2)
@@ -85,6 +86,22 @@ int main() {
     uint8_t ip_dst_addr[] = {0xfc, 0x00, 0x00, 0x11, 0x00, 0x00, 0x00, 0x00,
                           0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01};
     buffer_append(&pbuf, ip_dst_addr, sizeof ip_dst_addr);
+    //
+    struct in6_addr ip6_src_addr;
+    inet_pton(AF_INET6, "fc00:2::2", &ip6_src_addr);
+    //for (int i=0; i<sizeof(ip6_src_addr); i++) printf("%02x ", ((uint8_t *)&ip6_src_addr)[i]);
+    struct in6_addr ip6_dst_addr;
+    inet_pton(AF_INET6, "fc00:11::1", &ip6_dst_addr);
+    //for (int i=0; i<sizeof(ip6_dst_addr); i++) printf("%02x ", ((uint8_t *)&ip6_dst_addr)[i]);
+    struct ip6_hdr ipv6_hdr= {
+        .ip6_flow = htonl(0x60000000),
+        .ip6_plen = htons(72),
+        .ip6_nxt = IPPROTO_ROUTING,
+        .ip6_hlim = 63,
+        .ip6_src= ip6_src_addr,
+        .ip6_dst= ip6_dst_addr
+    };
+    buffer_append(&pbuf1,(uint8_t *)&ipv6_hdr, sizeof(struct ip6_hdr));
     
     
     // SRH
@@ -114,6 +131,7 @@ int main() {
                        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01};
     // なぜかadd_bytestobuf(63, 16, pbuf, seg6_sid);だとだめ
     buffer_append(&pbuf, seg6_sid, sizeof seg6_sid);
+
 
     // Overlay L2 Header
     // dst addr (52:54:00:11:11:11)
