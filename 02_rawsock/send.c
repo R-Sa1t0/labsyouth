@@ -10,8 +10,13 @@
 #include <net/if.h> // if_nametoindex()
 
 #include <net/ethernet.h>  //ethernet
-#include <netinet/ip6.h>
-#include <linux/in6.h> // IPPROTO_ROUTING
+#include <netinet/ip6.h> // ipv6 hdr
+#include <linux/in6.h> // IPPROTO_ROUTING, IPPROTO_ETHERNET
+#include <linux/seg6.h> // srv6 hdr
+
+void print_ptr(void *ptr){
+    printf("%p \n", ptr);
+}
 
 // charは最大値が127までしか保証されてないので，uint8_tを使う
 #define BUFFER_SIZE 1500
@@ -103,7 +108,7 @@ int main() {
     };
     buffer_append(&pbuf1,(uint8_t *)&ipv6_hdr, sizeof(struct ip6_hdr));
     
-    
+
     // SRH
     // next header (Ethernet: 143)
     uint8_t srh_next_hdr[] = {0x8f};
@@ -132,6 +137,33 @@ int main() {
     // なぜかadd_bytestobuf(63, 16, pbuf, seg6_sid);だとだめ
     buffer_append(&pbuf, seg6_sid, sizeof seg6_sid);
 
+    //struct ipv6_sr_hdr srh;
+    struct ipv6_sr_hdr *srh = malloc(sizeof(struct ipv6_sr_hdr) + sizeof(struct in6_addr));
+    memset(srh, 0, sizeof(struct ipv6_sr_hdr) + sizeof(struct in6_addr));
+    srh->nexthdr = 0x8f;
+    print_ptr(&srh->nexthdr);
+    srh->hdrlen = 0x02;
+    print_ptr(&srh->hdrlen);
+    srh->type = 0x04;
+    print_ptr(&srh->type);
+    srh->segments_left = 0x00;
+    print_ptr(&srh->segments_left);
+    srh->first_segment = 0x00;
+    print_ptr(&srh->first_segment);
+    srh->flags = 0x00;
+    print_ptr(&srh->flags);
+    srh->tag = 0x00;
+    print_ptr(&srh->tag);
+    memcpy(&srh->segments[0], &ip6_dst_addr, sizeof(struct in6_addr));
+    print_ptr(&srh->segments[0]);
+    // 8f 02 04 00 00 00 00 00 fc 00 00 11 00 00 00 00 00 00 00 00 00 00 00 01 になるはずが
+    // a0 42 ae e8 cd 55 00 00 fc 00 00 11 00 00 00 00 00 00 00 00 00 00 00 01 となってしまう
+    for (int i=0; i<(sizeof(struct ipv6_sr_hdr) + sizeof(struct in6_addr)); i++) printf("%02x ", ((uint8_t *)&srh)[i]); puts("");
+    //buffer_append(&pbuf1,(uint8_t *)&srh, sizeof(struct ipv6_sr_hdr) + sizeof(struct in6_addr));
+    
+
+    buffer_print(&pbuf);
+    //buffer_print(&pbuf1);
 
     // Overlay L2 Header
     // dst addr (52:54:00:11:11:11)
