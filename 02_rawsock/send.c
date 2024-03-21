@@ -1,25 +1,17 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <sys/socket.h>
-#include <arpa/inet.h>
-#include <netinet/icmp6.h>
-#include <netinet/ip6.h>
-#include <netinet/ether.h>
-#include <linux/if_packet.h>
-//#include <netpacket/packet.h>
+#include <stdio.h>  // fprintf()
+#include <stdlib.h> // exit(), EXIT_FAILURE
+#include <stdint.h> // uint8_t
+#include <string.h> // memset(), memcpy()
+#include <unistd.h> // close()
+#include <sys/socket.h> // socket(), size_t
+#include <arpa/inet.h> // IPPROTO_RAW
+#include <netinet/ether.h> // ETH_ALEN, ETH_P_ALL
+#include <linux/if_packet.h> // sockaddr_ll
+#include <net/if.h> // if_nametoindex()
+
 //#include <net/ethernet.h>
-#include <net/if.h>
 
 // charは最大値が127までしか保証されてないので，uint8_tを使う
-int add_bytestobuf(int offset, int len, uint8_t *buf, uint8_t *data) {
-    for (int i = 0; i < len; i++) {
-        buf[offset + i] = data[i];
-    }
-    return offset + len;
-}
-
 #define BUFFER_SIZE 1500
 typedef struct{
     uint8_t v[BUFFER_SIZE];
@@ -171,18 +163,18 @@ int main() {
 
 
     // dst addr : 52:b3:7d:78:93:61
-    struct sockaddr_ll dest_addr;
+    struct sockaddr_ll dst_addr;
     char ifname[] = "N2-R1";
     uint8_t mac_dest[6] = {0x52, 0xb3, 0x7d, 0x78, 0x93, 0x61};
 
-    memset(&dest_addr, 0, sizeof(dest_addr));
-    dest_addr.sll_family = AF_PACKET;
-    dest_addr.sll_protocol = htons(ETH_P_ALL);
-    dest_addr.sll_ifindex = if_nametoindex(ifname);
-    dest_addr.sll_halen = ETH_ALEN;
-    memcpy(dest_addr.sll_addr, mac_dest, ETH_ALEN);
+    memset(&dst_addr, 0, sizeof(dst_addr));
+    dst_addr.sll_family = AF_PACKET;
+    dst_addr.sll_protocol = htons(ETH_P_ALL);
+    dst_addr.sll_ifindex = if_nametoindex(ifname);
+    dst_addr.sll_halen = ETH_ALEN;
+    memcpy(dst_addr.sll_addr, mac_dest, ETH_ALEN);
     
-    int err = sendto(sockfd, pbuf.v, pbuf.len, 0, (struct sockaddr *)&dest_addr, sizeof(dest_addr));
+    int err = sendto(sockfd, pbuf.v, pbuf.len, 0, (struct sockaddr *)&dst_addr, sizeof(dst_addr));
 
     if (err < 0) {
         perror("sendto");
