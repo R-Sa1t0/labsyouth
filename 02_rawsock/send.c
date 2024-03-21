@@ -4,12 +4,12 @@
 #include <string.h> // memset(), memcpy()
 #include <unistd.h> // close()
 #include <sys/socket.h> // socket(), size_t
-#include <arpa/inet.h> // IPPROTO_RAW
+#include <arpa/inet.h> // IPPROTO_RAW, htons
 #include <netinet/ether.h> // ETH_ALEN, ETH_P_ALL
 #include <linux/if_packet.h> // sockaddr_ll
 #include <net/if.h> // if_nametoindex()
 
-//#include <net/ethernet.h>
+#include <net/ethernet.h>  //ethernet
 
 // charは最大値が127までしか保証されてないので，uint8_tを使う
 #define BUFFER_SIZE 1500
@@ -32,19 +32,18 @@ void buffer_append(Buffer *buf, const uint8_t *data, size_t data_size){
     // or: memcpy(&buf->v[buf->len], data, data_size);
     buf->len+=data_size;
 }
+void buffer_print(Buffer *buf){
+    for (int i=0; i<buf->len; i++) printf("%02x ", ((uint8_t *)buf->v)[i]);
+    puts("");
+}
 
 int main() {
-    // Create a raw socket
-    int sockfd = socket(AF_PACKET, SOCK_RAW, IPPROTO_RAW);
-    if (sockfd < 0) {
-        perror("socket");
-        exit(EXIT_FAILURE);
-    }
     Buffer pbuf;
     //uint8_t pbuf[126];
     buffer_init(&pbuf);
 
     // L2 (Ethernet) header
+    /*
     // dst addr (5e:93:21:63:f5:cd)
     uint8_t eth_dst_mac[] = {0x5e, 0x93, 0x21, 0x63, 0xf5, 0xcd};
     buffer_append(&pbuf, eth_dst_mac, sizeof eth_dst_mac);
@@ -53,7 +52,17 @@ int main() {
     buffer_append(&pbuf, eth_src_mac, sizeof eth_src_mac);
     // ethertype (IPv6)
     uint8_t ethertype[] = {0x86, 0xdd};
-    buffer_append(&pbuf, ethertype, sizeof ethertype);
+    buffer_append(&pbuf, ethertype, sizeof ethertype);    
+    */
+    struct ether_header eth_hdr = {
+        {0x5e, 0x93, 0x21, 0x63, 0xf5, 0xcd}, // dst
+        {0x52, 0xb3, 0x7d, 0x78, 0x93, 0x61}, // src
+        htons(ETHERTYPE_IPV6) // ethertype
+    };
+    buffer_append(&pbuf,(uint8_t *)&eth_hdr, sizeof(eth_hdr));
+    //for (int i=0; i<sizeof(eth_hdr); i++) printf("%02x ", ((uint8_t *)&eth_hdr)[i]);
+    //puts("");
+    //buffer_print(&pbuf);
 
     // L3 (IPv6) header
     // version, traffic class, flow label
@@ -76,6 +85,8 @@ int main() {
     uint8_t ip_dst_addr[] = {0xfc, 0x00, 0x00, 0x11, 0x00, 0x00, 0x00, 0x00,
                           0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01};
     buffer_append(&pbuf, ip_dst_addr, sizeof ip_dst_addr);
+    
+    
     // SRH
     // next header (Ethernet: 143)
     uint8_t srh_next_hdr[] = {0x8f};
@@ -161,6 +172,13 @@ int main() {
     uint8_t payload[] = {0x48, 0x41, 0x4c, 0x4c, 0x4f, 0x0a};
     buffer_append(&pbuf, payload, sizeof payload);
 
+
+    // Create a raw socket
+    int sockfd = socket(AF_PACKET, SOCK_RAW, IPPROTO_RAW);
+    if (sockfd < 0) {
+        perror("socket");
+        exit(EXIT_FAILURE);
+    }
 
     // dst addr : 52:b3:7d:78:93:61
     struct sockaddr_ll dst_addr;
