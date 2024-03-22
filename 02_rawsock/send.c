@@ -13,10 +13,9 @@
 #include <netinet/ip6.h> // ipv6 hdr
 #include <linux/in6.h> // IPPROTO_ROUTING, IPPROTO_ETHERNET
 #include <linux/seg6.h> // srv6 hdr
+#include <netinet/ip.h>  // ipv4 hdr
+#include <netinet/udp.h> // udp hdr 
 
-void print_ptr(void *ptr){
-    printf("%p \n", ptr);
-}
 
 // charは最大値が127までしか保証されてないので，uint8_tを使う
 #define BUFFER_SIZE 1500
@@ -45,53 +44,17 @@ void buffer_print(Buffer *buf){
 }
 
 int main() {
-    Buffer pbuf;
     Buffer pbuf1;
-    //uint8_t pbuf[126];
-    buffer_init(&pbuf);
+    buffer_init(&pbuf1);
 
-    // L2 (Ethernet) header
-    // dst addr (5e:93:21:63:f5:cd)
-    uint8_t eth_dst_mac[] = {0x5e, 0x93, 0x21, 0x63, 0xf5, 0xcd};
-    buffer_append(&pbuf, eth_dst_mac, sizeof eth_dst_mac);
-    // src addr (52:b3:7d:78:93:61)
-    uint8_t eth_src_mac[] = {0x52, 0xb3, 0x7d, 0x78, 0x93, 0x61};
-    buffer_append(&pbuf, eth_src_mac, sizeof eth_src_mac);
-    // ethertype (IPv6)
-    uint8_t ethertype[] = {0x86, 0xdd};
-    buffer_append(&pbuf, ethertype, sizeof ethertype);    
-    // 
     struct ether_header eth_hdr = {
         {0x5e, 0x93, 0x21, 0x63, 0xf5, 0xcd}, // dst
         {0x52, 0xb3, 0x7d, 0x78, 0x93, 0x61}, // src
         htons(ETHERTYPE_IPV6) // ethertype
     };
     buffer_append(&pbuf1,(uint8_t *)&eth_hdr, sizeof(eth_hdr));
-    //for (int i=0; i<sizeof(eth_hdr); i++) printf("%02x ", ((uint8_t *)&eth_hdr)[i]);
-    //puts("");
 
     // L3 (IPv6) header
-    // version, traffic class, flow label
-    uint8_t vtcfl[] = {0x60, 0x00, 0x00, 0x00};
-    buffer_append(&pbuf, vtcfl, sizeof vtcfl);
-    // payload length (72)
-    uint8_t payload_len[] = {0x00, 0x48};
-    buffer_append(&pbuf, payload_len, sizeof payload_len);
-    // next header (SRv6: 43)
-    uint8_t next_hdr[] = {0x2b};
-    buffer_append(&pbuf, next_hdr, sizeof next_hdr);
-    // hop limit (63)
-    uint8_t hop_limit[] = {0x3f};
-    buffer_append(&pbuf, hop_limit, sizeof hop_limit);
-    // src addr (fc00:2::2 / fc00:2:0:0:0:0:0:2)
-    uint8_t ip_src_addr[] = {0xfc, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00,
-                          0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02};
-    buffer_append(&pbuf, ip_src_addr, sizeof ip_src_addr);
-    // dst addr (fc00:11::1 / fc00:11:0:0:0:0:0:1)
-    uint8_t ip_dst_addr[] = {0xfc, 0x00, 0x00, 0x11, 0x00, 0x00, 0x00, 0x00,
-                          0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01};
-    buffer_append(&pbuf, ip_dst_addr, sizeof ip_dst_addr);
-    //
     struct in6_addr ip6_src_addr;
     inet_pton(AF_INET6, "fc00:2::2", &ip6_src_addr);
     //for (int i=0; i<sizeof(ip6_src_addr); i++) printf("%02x ", ((uint8_t *)&ip6_src_addr)[i]);
@@ -110,117 +73,55 @@ int main() {
     
 
     // SRH
-    // next header (Ethernet: 143)
-    uint8_t srh_next_hdr[] = {0x8f};
-    buffer_append(&pbuf, srh_next_hdr, sizeof srh_next_hdr);
-    // hdr ext len (2)
-    uint8_t srh_hdr_ext_len[] = {0x02};
-    buffer_append(&pbuf, srh_hdr_ext_len, sizeof srh_hdr_ext_len);
-    // routing type (Segment Routing: 4)
-    uint8_t srh_routing_type[] = {0x04};
-    buffer_append(&pbuf, srh_routing_type, sizeof srh_routing_type);
-    // Segment left (0)
-    uint8_t srh_seg_left[] = {0x00};
-    buffer_append(&pbuf, srh_seg_left, sizeof srh_seg_left);
-    // last entry (0)
-    uint8_t srh_last_entry[] = {0x00};
-    buffer_append(&pbuf, srh_last_entry, sizeof srh_last_entry);
-    // flags (0)
-    uint8_t srh_flags[] = {0x00};
-    buffer_append(&pbuf, srh_flags, sizeof srh_flags);
-    // tag (0)
-    uint8_t srh_tag[] = {0x00, 0x00};
-    buffer_append(&pbuf, srh_tag, sizeof srh_tag);
-    // segment list = ip_dst_addr
-    uint8_t seg6_sid[] = {0xfc, 0x00, 0x00, 0x11, 0x00, 0x00, 0x00, 0x00,
-                       0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01};
-    // なぜかadd_bytestobuf(63, 16, pbuf, seg6_sid);だとだめ
-    buffer_append(&pbuf, seg6_sid, sizeof seg6_sid);
-
-    //struct ipv6_sr_hdr srh;
     struct ipv6_sr_hdr *srh = malloc(sizeof(struct ipv6_sr_hdr) + sizeof(struct in6_addr));
     memset(srh, 0, sizeof(struct ipv6_sr_hdr) + sizeof(struct in6_addr));
     srh->nexthdr = 0x8f;
-    print_ptr(&srh->nexthdr);
     srh->hdrlen = 0x02;
-    print_ptr(&srh->hdrlen);
     srh->type = 0x04;
-    print_ptr(&srh->type);
     srh->segments_left = 0x00;
-    print_ptr(&srh->segments_left);
     srh->first_segment = 0x00;
-    print_ptr(&srh->first_segment);
     srh->flags = 0x00;
-    print_ptr(&srh->flags);
     srh->tag = 0x00;
-    print_ptr(&srh->tag);
     memcpy(&srh->segments[0], &ip6_dst_addr, sizeof(struct in6_addr));
-    print_ptr(&srh->segments[0]);
-    // 8f 02 04 00 00 00 00 00 fc 00 00 11 00 00 00 00 00 00 00 00 00 00 00 01 になるはずが
-    // a0 42 ae e8 cd 55 00 00 fc 00 00 11 00 00 00 00 00 00 00 00 00 00 00 01 となってしまう
-    for (int i=0; i<(sizeof(struct ipv6_sr_hdr) + sizeof(struct in6_addr)); i++) printf("%02x ", ((uint8_t *)&srh)[i]); puts("");
-    //buffer_append(&pbuf1,(uint8_t *)&srh, sizeof(struct ipv6_sr_hdr) + sizeof(struct in6_addr));
-    
-
-    buffer_print(&pbuf);
-    //buffer_print(&pbuf1);
+    //for (int i=0; i<(sizeof(struct ipv6_sr_hdr) + sizeof(struct in6_addr)); i++) printf("%02x ", ((uint8_t *)srh)[i]); puts("");
+    buffer_append(&pbuf1,(uint8_t *)srh, sizeof(struct ipv6_sr_hdr) + sizeof(struct in6_addr));
 
     // Overlay L2 Header
-    // dst addr (52:54:00:11:11:11)
-    uint8_t overlay_eth_dst_mac[] = {0x52, 0x54, 0x00, 0x11, 0x11, 0x11};
-    buffer_append(&pbuf, overlay_eth_dst_mac, sizeof overlay_eth_dst_mac);
-    // src addr (52:54:00:22:22:22)
-    uint8_t overlay_eth_src_mac[] = {0x52, 0x54, 0x00, 0x22, 0x22, 0x22};
-    buffer_append(&pbuf, overlay_eth_src_mac, sizeof overlay_eth_src_mac);
-    // ethertype (IP)
-    uint8_t overlay_ethertype[] = {0x08, 0x00};
-    buffer_append(&pbuf, overlay_ethertype, sizeof overlay_ethertype);
+    struct ether_header overlay_eth_hdr = {
+        {0x52, 0x54, 0x00, 0x11, 0x11, 0x11}, // dst
+        {0x52, 0x54, 0x00, 0x22, 0x22, 0x22}, // src
+        htons(ETHERTYPE_IP) // ethertype
+    };
+    buffer_append(&pbuf1,(uint8_t *)&overlay_eth_hdr, sizeof(overlay_eth_hdr));
+    
 
     // Overlay L3 Header (IPv4)
-    // version, IHL, DSCP, ECN
-    uint8_t overlay_vihl[] = {0x45, 0x00};
-    buffer_append(&pbuf, overlay_vihl, sizeof overlay_vihl);
-    // total length (40)
-    uint8_t overlay_total_len[] = {0x00, 0x22};
-    buffer_append(&pbuf, overlay_total_len, sizeof overlay_total_len);
-    // indentification (1)
-    uint8_t overlay_identification[] = {0xbc, 0x5e};
-    buffer_append(&pbuf, overlay_identification, sizeof overlay_identification);
-    // flags, fragment offset (0)
-    uint8_t overlay_flags_fo[] = {0x40, 0x00};
-    buffer_append(&pbuf, overlay_flags_fo, sizeof overlay_flags_fo);
-    // TTL (64)
-    uint8_t overlay_ttl[] = {0x40};
-    buffer_append(&pbuf, overlay_ttl, sizeof overlay_ttl);
-    // protocol (UDP=17)
-    uint8_t overlay_protocol[] = {0x11};
-    buffer_append(&pbuf, overlay_protocol, sizeof overlay_protocol);
-    // checksum (0)
-    uint8_t overlay_checksum[] = {0x68, 0x6a};
-    buffer_append(&pbuf, overlay_checksum, sizeof overlay_checksum);
-    // src addr (10.0.1.2)
-    uint8_t overlay_ip_src_addr[] = {0x0a, 0x00, 0x01, 0x02};
-    buffer_append(&pbuf, overlay_ip_src_addr, sizeof overlay_ip_src_addr);
-    // dst addr (10.0.1.1)
-    uint8_t overlay_ip_dst_addr[] = {0x0a, 0x00, 0x01, 0x01};
-    buffer_append(&pbuf, overlay_ip_dst_addr, sizeof overlay_ip_dst_addr);
+    struct iphdr overlay_iphdr = {
+        .version = 4, // IPv4
+        .ihl = 5, // IP Header Length = 5 * 32bit words
+        .tos = 0, 
+        .tot_len = htons(34),
+        .id = htons(0xbc5e),
+        .frag_off = htons(0x4000), 
+        .ttl = 64,
+        .protocol = 0x11, // udp: 17
+        .check = htons(0x686a), // checksum
+        .saddr = htonl(0x0a000102), // src ip
+        .daddr = htonl(0x0a000101) // dst ip
+    };
+    buffer_append(&pbuf1,(uint8_t *)&overlay_iphdr, sizeof(overlay_iphdr));
 
     // UDP Header
-    // src port (8080)
-    uint8_t udp_src_port[] = {0x1f, 0x90};
-    buffer_append(&pbuf, udp_src_port, sizeof udp_src_port);
-    // dst port (46550)
-    uint8_t udp_dst_port[] = {0xe5, 0xc8};
-    buffer_append(&pbuf, udp_dst_port, sizeof udp_dst_port);
-    // length (14)
-    uint8_t udp_len[] = {0x00, 0x0e};
-    buffer_append(&pbuf, udp_len, sizeof udp_len);
-    // checksum (0)
-    uint8_t udp_checksum[] = {0x00, 0x00};
-    buffer_append(&pbuf, udp_checksum, sizeof udp_checksum);
-    // payload (わざとtypo)
     uint8_t payload[] = {0x48, 0x41, 0x4c, 0x4c, 0x4f, 0x0a};
-    buffer_append(&pbuf, payload, sizeof payload);
+    struct udphdr overlay_udphdr = {
+        .uh_sport = htons(8080),
+        .uh_dport = htons(58824),
+        .uh_ulen = htons(14),
+        .uh_sum = 0
+    };
+    buffer_append(&pbuf1,(uint8_t *)&overlay_udphdr, sizeof(overlay_udphdr));
+    buffer_append(&pbuf1, payload, sizeof payload);
+    buffer_print(&pbuf1);
 
 
     // Create a raw socket
@@ -242,7 +143,7 @@ int main() {
     dst_addr.sll_halen = ETH_ALEN;
     memcpy(dst_addr.sll_addr, mac_dest, ETH_ALEN);
     
-    int err = sendto(sockfd, pbuf.v, pbuf.len, 0, (struct sockaddr *)&dst_addr, sizeof(dst_addr));
+    int err = sendto(sockfd, pbuf1.v, pbuf1.len, 0, (struct sockaddr *)&dst_addr, sizeof(dst_addr));
 
     if (err < 0) {
         perror("sendto");
