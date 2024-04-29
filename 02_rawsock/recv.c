@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <linux/if_ether.h> // for ETH_P_ALL
 
-int mac_check(int offset, unsigned char *buf, unsigned char *mac){
+int mac_check(int offset, uint8_t *buf, uint8_t *mac){
     for(int i=0; i<6; i++){
         if (buf[offset+i] != mac[i]){
             return 0;
@@ -13,7 +13,7 @@ int mac_check(int offset, unsigned char *buf, unsigned char *mac){
     return 1;
 }
 
-void packet_processing(unsigned char *buf, ssize_t len){
+void packet_processing(uint8_t *buf, ssize_t len){
     // wan-side nic mac addr
     unsigned char node_mac_dst[6] = {0x9e, 0xd0, 0x9e, 0x53, 0x3d, 0xb2};
     // if dst or src mac is not for me, return
@@ -49,7 +49,7 @@ int main(void){
         fprintf(stderr, "Failed to create socket\n");
         return 1;
     }
-    unsigned char buf[1550];
+    uint8_t buf[1550];
 
     while (1){
         ssize_t len = recv(sockfd, buf, sizeof(buf), 0);
