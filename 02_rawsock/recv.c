@@ -15,7 +15,7 @@ int mac_check(int offset, uint8_t *buf, uint8_t *mac){
 
 void packet_processing(uint8_t *buf, ssize_t len){
     // wan-side nic mac addr
-    unsigned char node_mac_dst[6] = {0x9e, 0xd0, 0x9e, 0x53, 0x3d, 0xb2};
+    uint8_t node_mac_dst[6] = {0x9e, 0xd0, 0x9e, 0x53, 0x3d, 0xb2};
     // if dst or src mac is not for me, return
     if (mac_check(0, buf, node_mac_dst) == 0
         && mac_check(6, buf, node_mac_dst) == 0) return;
