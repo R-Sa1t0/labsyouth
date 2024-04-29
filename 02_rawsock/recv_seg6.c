@@ -14,6 +14,28 @@ int mac_check(int offset, uint8_t *buf, uint8_t *mac){
 }
 
 void packet_processing(uint8_t *buf, ssize_t len){
+    // wan-side nic mac addr
+    uint8_t node_mac_dst[6] = {0x9e, 0xd0, 0x9e, 0x53, 0x3d, 0xb2};
+    // if dst or src mac is not for me, return
+    if (mac_check(0, buf, node_mac_dst) == 0
+        && mac_check(6, buf, node_mac_dst) == 0) return;
+
+    // ethertype is not 0x86dd, return
+    if (buf[12] != 0x86 || buf[13] != 0xdd) return;
+    // ipv6 next header is not 43 (routing header), return
+    if (buf[20] != 43) return;
+
+    // print sid
+    uint8_t sid[16];
+    for(int i=0; i<16; i++){
+        sid[i] = buf[14+40+8+i];
+    }
+    printf("Received SRv6 Packet! (%ld bytes)\n", len);
+    printf("SID: ");
+    for(int i=0; i<16; i++){
+        printf("%02x ", sid[i]);
+    }
+    puts("");
     for (int i=0; i<len; i++){
         printf("%02x ", buf[i]);
     }
