@@ -15,7 +15,6 @@
 #include <linux/if_packet.h> //sockaddr_ll
 
 // sudo ip netns exec IN1 ./a.out fc00:1::2 fc00:12::1 IN1-IC1 IN1-IR1 fe:6a:96:11:e7:1c
-// 
 
 #define BUFFER_SIZE 1550
 typedef struct{
@@ -123,12 +122,13 @@ arg parse_arg(int argc, char *argv[]){
 int open_pernic_rawsock(char* nic_name){
     int fd;
     struct ifreq ifr;
-    
+    printf("ok-rawsock\n");
     fd = socket(AF_INET, SOCK_DGRAM, 0);
     if (fd < 0) {
         fprintf(stderr, "Failed to create socket\n");
         exit(EXIT_FAILURE);
     }
+    printf("ok-rawsock1\n");
     strncpy(ifr.ifr_name, nic_name, IFNAMSIZ - 1);
     if (ioctl(fd, SIOCGIFINDEX, &ifr) == -1) {
         fprintf(stderr, "ioctl SIOCGIFINDEX failed: %s\n", strerror(errno));
@@ -140,6 +140,7 @@ int open_pernic_rawsock(char* nic_name){
         fprintf(stderr, "Failed to create socket\n");
         exit(EXIT_FAILURE);
     }
+    printf("ok-rawsock2\n");
 
     struct sockaddr_ll addr;
     memset(&addr, 0x00, sizeof(addr));
@@ -192,13 +193,13 @@ Buffer do_seg6encap(arg config, Buffer* payload){
 }
 
 int main(int argc, char *argv[]){
-    printf("1");
+    printf("1\n");
     arg config = parse_arg(argc, argv);
-    printf("2");
+    printf("2\n");
     int lan_fd = open_pernic_rawsock(config.lan_nic_name);
-    printf("3");
+    printf("3\n");
     int wan_fd = open_pernic_rawsock(config.wan_nic_name);
-    fprintf(stdout ,"socket opened!");
+    fprintf(stdout ,"socket opened!\n");
 
     struct sockaddr_ll dst_addr;
     memset(&dst_addr, 0, sizeof(dst_addr));
@@ -211,17 +212,24 @@ int main(int argc, char *argv[]){
     Buffer rcvbuf;
     buffer_init(&rcvbuf);
     Buffer sendbuf;
-    fprintf(stdout ,"buffer ok!");
+    fprintf(stdout ,"buffer ok!\n");
     
     while (1){
+        fprintf(stdout ,"while 1\n");
         ssize_t len = recv(lan_fd, rcvbuf.v, rcvbuf.len, 0);
+        fprintf(stdout ,"recv\n");
+        printf("len : %d\n", len);
         if (len < 0) {
+            printf("recv err\n");
             fprintf(stderr, "Failed to receive\n");
             return 1;
         }else if (len!=0){
-            printf("payload: ");
+            printf("payload: \n");
             buffer_print(&rcvbuf);
+            printf("aaa \n");
+            rcvbuf.len = len;
             sendbuf = do_seg6encap(config, &rcvbuf);
+            printf("bbb \n");
             int err = sendto(wan_fd, sendbuf.v, sendbuf.len, 0, (struct sockaddr *)&dst_addr, sizeof(dst_addr));
             if (err < 0) {
                 perror("sendto");
