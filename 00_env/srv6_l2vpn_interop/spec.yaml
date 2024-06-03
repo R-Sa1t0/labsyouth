@@ -25,7 +25,7 @@ nodes:
     type: netns
     interfaces:
       - { name: IN2-IR1, type: direct, args: IR1#IR1-IN2 }
-      - { name: IN2-IC2, type: direct, args: IC2#IIC2-IN2 }
+      - { name: IN2-IC2, type: direct, args: IC2#IC2-IN2 }
     sysctls:
       - sysctl: net.ipv4.conf.all.rp_filter=0
       - sysctl: net.ipv6.conf.all.forwarding=1
@@ -37,7 +37,7 @@ nodes:
     type: netns
     interfaces:
       - { name: IC1-IN1, type: direct, args: IN1#IN1-IC1 }
-  - name: IIC2
+  - name: IC2
     type: netns
     interfaces:
       - { name: IC2-IN2, type: direct, args: IN2#IN2-IC2 }
@@ -100,7 +100,7 @@ node_configs:
 
   - name: IC2
     cmds:
-      - cmd: ip link set IC2-IIN2 address 52:54:00:22:22:22
-      - cmd: ip link set IC2-IIN2 up
-      - cmd: ip addr add 10.0.1.2/24 dev IC2-IIN2
-      - cmd: ip nei replace 10.0.1.1 lladdr 52:54:00:11:11:11 dev IC2-IIN2
+      - cmd: ip link set IC2-IN2 address 52:54:00:22:22:22
+      - cmd: ip link set IC2-IN2 up
+      - cmd: ip addr add 10.0.1.2/24 dev IC2-IN2
+      - cmd: ip nei replace 10.0.1.1 lladdr 52:54:00:11:11:11 dev IC2-IN2
