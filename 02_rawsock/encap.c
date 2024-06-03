@@ -14,6 +14,9 @@
 #include <net/if.h>  //struct ifreq
 #include <linux/if_packet.h> //sockaddr_ll
 
+// sudo ip netns exec IN1 ./a.out fc00:1::2 fc00:12::1 IN1-IC1 IN1-IR1 fe:6a:96:11:e7:1c
+// 
+
 #define BUFFER_SIZE 1550
 typedef struct{
     uint8_t v[BUFFER_SIZE];
@@ -62,12 +65,15 @@ struct ether_addr get_macaddr(const char *nic_name){
     return addr; 
 }
 
-int parse_macaddr(struct ether_addr *addr,const char *addr_str){
+int parse_macaddr(struct ether_addr *addr, const char *addr_str) {
+    unsigned int octets[6];
     if (sscanf(addr_str, "%x:%x:%x:%x:%x:%x", 
-        addr->ether_addr_octet[0], addr->ether_addr_octet[1],
-        addr->ether_addr_octet[2], addr->ether_addr_octet[3],
-        addr->ether_addr_octet[4], addr->ether_addr_octet[5])==6){
-    }else{
+               &octets[0], &octets[1], &octets[2], 
+               &octets[3], &octets[4], &octets[5]) == 6) {
+        for (int i = 0; i < 6; i++) {
+            addr->ether_addr_octet[i] = (uint8_t)octets[i];
+        }
+    } else {
         return -1;
     }
     return 1;
@@ -186,8 +192,11 @@ Buffer do_seg6encap(arg config, Buffer* payload){
 }
 
 int main(int argc, char *argv[]){
+    printf("1");
     arg config = parse_arg(argc, argv);
+    printf("2");
     int lan_fd = open_pernic_rawsock(config.lan_nic_name);
+    printf("3");
     int wan_fd = open_pernic_rawsock(config.wan_nic_name);
     fprintf(stdout ,"socket opened!");
 
