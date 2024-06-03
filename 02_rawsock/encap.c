@@ -151,10 +151,11 @@ Buffer do_seg6encap(arg config, Buffer* payload){
     buffer_init(&tmpbuf);
     
     struct ether_header eth_hdr = {
-        config.dst_mac.ether_addr_octet, // dst
-        config.lan_mac.ether_addr_octet, // src
         htons(ETHERTYPE_IPV6) // ethertype
     };
+    memcpy(eth_hdr.ether_dhost, config.dst_mac.ether_addr_octet, sizeof(eth_hdr.ether_dhost));
+    memcpy(eth_hdr.ether_shost, config.lan_mac.ether_addr_octet, sizeof(eth_hdr.ether_shost));
+
     buffer_append(&tmpbuf,(uint8_t *)&eth_hdr, sizeof(eth_hdr));
 
     struct ip6_hdr ipv6_hdr= {
@@ -188,6 +189,7 @@ int main(int argc, char *argv[]){
     arg config = parse_arg(argc, argv);
     int lan_fd = open_pernic_rawsock(config.lan_nic_name);
     int wan_fd = open_pernic_rawsock(config.wan_nic_name);
+    fprintf(stdout ,"socket opened!");
 
     struct sockaddr_ll dst_addr;
     memset(&dst_addr, 0, sizeof(dst_addr));
@@ -200,6 +202,8 @@ int main(int argc, char *argv[]){
     Buffer rcvbuf;
     buffer_init(&rcvbuf);
     Buffer sendbuf;
+    fprintf(stdout ,"buffer ok!");
+    
     while (1){
         ssize_t len = recv(lan_fd, rcvbuf.v, rcvbuf.len, 0);
         if (len < 0) {
