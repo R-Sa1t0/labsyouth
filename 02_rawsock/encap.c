@@ -48,7 +48,14 @@ struct ether_addr get_macaddr(const char *nic_name){
         perror("socket");
         exit(EXIT_FAILURE);
     }
-    strncpy(ifr.ifr_name, nic_name, IFNAMSIZ - 1);
+    
+    if (strlen(nic_name) < IFNAMSIZ) {
+        strcpy(ifr.ifr_name, nic_name);
+    } else {
+        strncpy(ifr.ifr_name, nic_name, IFNAMSIZ - 1);
+        ifr.ifr_name[IFNAMSIZ - 1] = '\0';
+    }
+    //strncpy(ifr.ifr_name, nic_name, IFNAMSIZ - 1);
 
     if (ioctl(sock_fd, SIOCGIFHWADDR, &ifr) < 0) {
         perror("ioctl");
