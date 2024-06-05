@@ -15,6 +15,7 @@
 #include <linux/if_packet.h> //sockaddr_ll
 
 // sudo ip netns exec IN1 ./a.out fc00:1::2 fc00:12::1 IN1-IC1 IN1-IR1 fe:6a:96:11:e7:1c
+// sudo ip netns exec IN2 ./a.out fc00:2::@ fc00:11::1 IN2-IC2 IN2-IR1 5e:93:21:63:f5:cd
 
 #define BUFFER_SIZE 1550
 typedef struct{
@@ -165,7 +166,7 @@ Buffer do_seg6encap(arg config, Buffer* payload){
     buffer_init(&tmpbuf);
     
     struct ether_header eth_hdr = {
-        htons(ETHERTYPE_IPV6) // ethertype
+        .ether_type = htons(ETHERTYPE_IPV6) // ethertype
     };
     memcpy(eth_hdr.ether_dhost, config.dst_mac.ether_addr_octet, sizeof(eth_hdr.ether_dhost));
     memcpy(eth_hdr.ether_shost, config.lan_mac.ether_addr_octet, sizeof(eth_hdr.ether_shost));
@@ -174,7 +175,8 @@ Buffer do_seg6encap(arg config, Buffer* payload){
 
     struct ip6_hdr ipv6_hdr= {
         .ip6_flow = htonl(0x60000000),
-        .ip6_plen = htons(72),
+        //.ip6_plen = htons(72),
+        .ip6_plen = htons(payload->len+24), //payload len + SRH(1sid)len
         .ip6_nxt = IPPROTO_ROUTING,
         .ip6_hlim = 63,
         .ip6_src= config.ip6_srcaddr,
@@ -223,20 +225,25 @@ int main(int argc, char *argv[]){
     
     while (1){
         fprintf(stdout ,"while 1\n");
-        ssize_t len = recv(lan_fd, rcvbuf.v, rcvbuf.len, 0);
+
+        ssize_t len = recv(lan_fd, rcvbuf.v, sizeof rcvbuf.v, 0);
+
         fprintf(stdout ,"recv\n");
         printf("len : %d\n", len);
+
         if (len < 0) {
-            printf("recv err\n");
             fprintf(stderr, "Failed to receive\n");
             return 1;
         }else if (len!=0){
             printf("payload: \n");
             buffer_print(&rcvbuf);
-            printf("aaa \n");
+
             rcvbuf.len = len;
             sendbuf = do_seg6encap(config, &rcvbuf);
-            printf("bbb \n");
+            
+            printf("encaped packet: \n");
+            buffer_print(&sendbuf);
+
             int err = sendto(wan_fd, sendbuf.v, sendbuf.len, 0, (struct sockaddr *)&dst_addr, sizeof(dst_addr));
             if (err < 0) {
                 perror("sendto");
