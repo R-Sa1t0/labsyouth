@@ -3,7 +3,7 @@ nodes:
     type: netns
     interfaces:
       - { name: R1-N1, type: direct, args: N1#N1-R1 }
-      - { name: R1-N2, type: direct, args: N2#N2-R1 }
+      - { name: R1-N2, type: direct, args: N2#N2-R1, addr: 5e:93:21:63:f5:cd }
     sysctls:
       - sysctl: net.ipv4.conf.all.rp_filter=0
       - sysctl: net.ipv6.conf.all.forwarding=1
@@ -46,15 +46,12 @@ nodes:
 node_configs:
   - name: R1
     cmds:
+      # ip setup
       - cmd: ip -6 addr add fc00:1::1/96 dev R1-N1
       - cmd: ip -6 addr add fc00:2::1/96 dev R1-N2
       # for sid
       - cmd: ip -6 route add fc00:11::/96 via fc00:1::2
       - cmd: ip -6 route add fc00:12::/96 via fc00:2::2
-      # mac setup
-      - cmd: ip link set R1-N2 down
-      - cmd: ip link set R1-N2 address 5e:93:21:63:f5:cd
-      - cmd: ip link set R1-N2 up
 
 
   - name: N1
