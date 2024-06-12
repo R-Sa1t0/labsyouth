@@ -11,24 +11,9 @@
 #include <linux/if_packet.h>
 #include <net/ethernet.h>
 
+#include "lib/buf.h"
+
 #define NIC_NAME "N2-C2"
-
-int mac_check(int offset, uint8_t *buf, uint8_t *mac){
-    for(int i=0; i<6; i++){
-        if (buf[offset+i] != mac[i]){
-            return 0;
-        }
-    }
-    return 1;
-}
-
-void packet_processing(uint8_t *buf, ssize_t len){
-    for (int i=0; i<len; i++){
-        printf("%02x ", buf[i]);
-    }
-    
-    printf("\n\n");
-}
 
 int main(void){
     int sockfd =0;
@@ -61,14 +46,17 @@ int main(void){
         exit(EXIT_FAILURE);
     }
 
-    uint8_t buf[1550];
+    Buffer buf;
+    if ((buffer_init(&buf))!=0) exit(1);
+
     while (1){
-        ssize_t len = recv(sockfd, buf, sizeof(buf), 0);
+        ssize_t len = recv(sockfd, buf.v, sizeof(buf.v), 0);
         if (len < 0) {
             fprintf(stderr, "Failed to receive\n");
             return 1;
         }else if (len!=0){
-            packet_processing(buf, len);
+            buf.len = len;
+            buffer_print(&buf);
         }
     }
 }
