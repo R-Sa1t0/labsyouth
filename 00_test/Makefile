@@ -1,6 +1,6 @@
 .PHONY: all
 
-all: up
+all: pytest
 
 up:
 	sudo ip netns add t1
@@ -22,6 +22,14 @@ test:
 down:
 	sudo ip netns del t1
 
-clean:
+.PHONY: pytest
+pt:
+	sudo pytest pytest/main.py
+p:
+	sudo python3 pytest/main.py
+
+memo:
 	sudo python3 recv.py
 #	sudo python3 send.py
+
+
