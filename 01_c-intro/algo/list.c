@@ -1,45 +1,44 @@
-#include <stdio.h>
 #include <stdlib.h>
-#include <stdint.h>
+#include <stdio.h>
 #include <stdbool.h>
 
-struct cell {
-    uint8_t value;
-    struct cell **next;
+typedef int data_t;
+struct cell{
+    data_t data;
+    struct cell *next;
 };
-typedef struct cell cell;
 
-void insert(cell **cell_ptr, uint8_t new_val){
-    cell *new_cell=(cell *)malloc(sizeof(cell));
-    new_cell->value=new_val;
-    new_cell->next=*cell_ptr;
-    *cell_ptr=new_cell;
+static void insert(struct cell* cell_ptr, data_t newval)
+{
+    struct cell *new_cell=malloc(sizeof(struct cell));
+    if(new_cell==NULL) return;
+
+    new_cell->data=newval;
+    new_cell->next=NULL;
+    cell_ptr->next=new_cell;
 }
-void delete(cell **cell_ptr){
-    cell *target=*cell_ptr;
-    *cell_ptr=target->next;
-    free(target);
-}
-void print_cell(cell **head_ptr){
-    printf("head addr : %x\n", head_ptr);
-    if(head_ptr==NULL) return;
-    printf("%x\n", &head_ptr);
-    cell *p=head_ptr;
-    while(true){
-        if((p->next)==NULL||p==NULL) break;
-        printf("addr : %x / value : %d\n", p, p->value);
+
+static void print(struct cell *head_ptr)
+{
+    printf("head addr : %p\n", (void*)head_ptr);
+    struct cell *p=head_ptr;
+    while (p!=NULL)
+    {
+        printf("addr : %p / data : %d / next : %p\n", (void*)p, p->data, (void*)p->next);
         p=p->next;
     }
+    puts("");
 }
 
-int main(void){
-    cell *head=NULL, **p;
-    p=&head;
-    print_cell(p);
-    /*
-    for(uint8_t i=0;i<5;i++){
-        insert(p,i);
-        p=&((*p)->next);
-    }
-    */
+
+int main(void)
+{
+    struct cell c1,*head;
+    head=&c1;
+    c1.data=100;
+    c1.next=NULL;
+    print(head);
+
+    insert(&c1, 200);
+    print(head);
 }
