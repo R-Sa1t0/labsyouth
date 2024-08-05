@@ -1,6 +1,7 @@
 // stack
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 
 typedef int8_t data_t;
 typedef struct cell
@@ -12,7 +13,7 @@ typedef struct stack
 {
     cell_t* root;
     cell_t* last;
-    u_int8_t cell_num;
+    uint8_t n;
 } stack_t;
 
 
@@ -27,7 +28,8 @@ static void display(cell_t* p)
     }
     puts("");
 }
-static cell_t* add_cell(cell_t* c, data_t v){
+static cell_t* add_cell(cell_t* c, data_t v)
+{
     cell_t *nc=malloc(sizeof(cell_t));
     if (nc==NULL) puts("malloc error!");
     
@@ -36,11 +38,24 @@ static cell_t* add_cell(cell_t* c, data_t v){
     if(c!=NULL) c->next=nc;
     return nc;
 }
-static void del_cell(cell_t *p, u_int8_t n){
-    if(p==NULL) return NULL;
-    cell_t* nc=p->next;
+static void del_cell(stack_t *s, uint8_t n)
+{
+    cell_t *p, *pb;
+    p=s->root;
+    for(uint8_t i=0;i<n;i++){
+        if(p==NULL) return;
+        pb=p;
+        p=p->next;
+    }
+    if(p==s->last){
+        s->last = pb;
+        s->last->next=NULL;
+    }else if(pb!=NULL){
+        pb->next = p->next;
+    }else{
+        s->root=p->next;
+    }
     free(p);
-    return nc;
 }
 
 static void push(stack_t* s, data_t v)
@@ -51,34 +66,36 @@ static void push(stack_t* s, data_t v)
     }else{
         s->last=add_cell(s->last, v);
     }
-    s->cell_num++;
+    s->n++;
 }
 
 static data_t pop(stack_t *s)
 {
+    data_t t;
     if(s->root==NULL){
         puts("empty");
     }else if(s->root==s->last){
-        return (s->root)->val;
+        t=(s->root)->val;
+        s->root=s->last=NULL;
     }else{
-        display(s->last);
-        data_t t=(s->last)->val;
-            
-        return t;
+        t=(s->last)->val;
+        del_cell(s, (s->n)-1);
     }
+    s->n--;
+    return t;
 }
 
 int main(void){
     stack_t s1={NULL, NULL,0};
     display(s1.root);
 
-    for(int8_t i=0;i<10;i++) push(&s1, i);
+    for(int8_t i=0;i<5;i++) push(&s1, i);
     display(s1.root);
 
     for(int8_t i=0; i<5; i++)
     {
-        printf("%d\n", pop(&s1));
+        printf("poped : %d\n", pop(&s1));
+        display(s1.root);
         puts("");
     }
-    display(s1.root);
 }
