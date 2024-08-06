@@ -52,34 +52,41 @@ static data_t pop(queue_t* q){
         pb=p;
         p=p->next;
     }
-    printf("p: %p, pd: %p, n: %d\n", p, pb, q->n);
+    //printf("p: %p, pd: %p, n: %d\n", p, pb, q->n);
+
+    if(q->head==p){
+        q->head=q->tail=NULL;
+        return t;
+    }
+
     pb->next=NULL;
     q->tail=pb;
     q->n--;
+
     free(p);
 
-/*
+    /*
 
 
-    if(p==(q->head)){
-        q->head=q->tail=NULL;
-    }else if(p==(q->tail)){
-        pb->next=NULL;
-    }else{
-        pb->next=NULL;
-    }
-    free(pb);
-*/
+        if(p==(q->head)){
+            q->head=q->tail=NULL;
+        }else if(p==(q->tail)){
+            pb->next=NULL;
+        }else{
+            pb->next=NULL;
+        }
+        free(pb);
+    */
 
     return t;
 }
 
 int main(void){
     queue_t q={NULL, NULL, 0};
-    for(int8_t i=0;i<5;i++) push(&q, i);
+    for(int8_t i=0;i<15;i++) push(&q, i);
     display(q.head);
 
-    for(int8_t i=0;i<5;i++) {
+    for(int8_t i=0;i<20;i++) {
         printf("%d\n", pop(&q));
         display(q.head);
         puts("");
