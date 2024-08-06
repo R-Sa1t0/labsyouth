@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 typedef uint8_t data_t;
 typedef struct cell{
@@ -13,7 +14,8 @@ typedef struct queue{
     uint8_t n;
 }queue_t;
 
-static void display(cell_t* p){
+static void display(cell_t* p)
+{
     printf("head addr : %p\n", (void *)p);
     cell_t*t=p;
     while(t!=NULL)
@@ -24,31 +26,38 @@ static void display(cell_t* p){
     puts("");
 }
 
-static void push(queue_t* q, data_t v){
+static int8_t push(queue_t* q, data_t v)
+{
     cell_t *nc=malloc(sizeof(cell_t));
-    if(nc==NULL) puts("malloc error");
+    if(nc==NULL){
+        puts("malloc error!");
+        return false;
+    }
 
     nc->val=v;
     nc->next=q->head;
     if(q->head==NULL) q->tail=nc;
     q->head=nc;
     q->n++;
+
+    return true;
 }
 
-static data_t pop(queue_t* q){
-    data_t t;
+static int8_t pop(queue_t* q, data_t *v)
+{
     cell_t *p, *pb;
     if(q->head==NULL){
         puts("queue empty");
+        return false;
     }else if(q->head==q->tail){
-        t=q->head->val;
+        *v=q->head->val;
     }else{
-        t=q->tail->val;
+        *v=q->tail->val;
     }
 
     p=q->head;
     for(uint8_t i=0;i<(q->n)-1;i++){
-        if(p==NULL) break;
+        if(p==NULL) return false;
         pb=p;
         p=p->next;
     }
@@ -56,7 +65,7 @@ static data_t pop(queue_t* q){
 
     if(q->head==p){
         q->head=q->tail=NULL;
-        return t;
+        return true;
     }
 
     pb->next=NULL;
@@ -64,32 +73,20 @@ static data_t pop(queue_t* q){
     q->n--;
 
     free(p);
-
-    /*
-
-
-        if(p==(q->head)){
-            q->head=q->tail=NULL;
-        }else if(p==(q->tail)){
-            pb->next=NULL;
-        }else{
-            pb->next=NULL;
-        }
-        free(pb);
-    */
-
-    return t;
+    return true;
 }
 
-int main(void){
+int main(void)
+{
     queue_t q={NULL, NULL, 0};
-    for(int8_t i=0;i<15;i++) push(&q, i);
+    for(int8_t i=0;i<5;i++) push(&q, i);
     display(q.head);
 
-    for(int8_t i=0;i<20;i++) {
-        printf("%d\n", pop(&q));
+    for(int8_t i=0;i<5;i++) {
+        data_t t;
+        if(pop(&q, &t)!=true) return -1;
+        printf("%d\n", t);
         display(q.head);
         puts("");
     }
-    
 }
