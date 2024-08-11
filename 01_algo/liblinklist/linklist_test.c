@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "liblist.h"
+#include "liblinklist.h"
 
 int main(void){
     printf("init\n");

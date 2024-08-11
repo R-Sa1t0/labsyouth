@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdint.h>
-#include "liblist.h"
+#include "liblinklist.h"
 
 //エラーするときのスタックトレースを取りたい
 void
