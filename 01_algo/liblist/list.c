@@ -4,14 +4,14 @@
 #include <stdint.h>
 
 typedef uint8_t data_t;
-struct cell{
+typedef struct cell{
     data_t data;
     struct cell *next;
-};
+}Cell;
 
-static struct cell * insert(struct cell* cell_ptr, data_t newval)
+static Cell * insert(Cell* cell_ptr, data_t newval)
 {
-    struct cell *new_cell=malloc(sizeof(struct cell));
+    Cell *new_cell=malloc(sizeof(Cell));
     if(new_cell==NULL) puts("malloc error!");
 
     new_cell->data=newval;
@@ -21,19 +21,19 @@ static struct cell * insert(struct cell* cell_ptr, data_t newval)
     return new_cell;
 }
 
-static struct cell * delete(struct cell* cell_ptr)
+static Cell * delete(Cell* cell_ptr)
 {
     if(cell_ptr==NULL) return NULL;
 
-    struct cell *next_cell = cell_ptr->next;
+    Cell *next_cell = cell_ptr->next;
     free(cell_ptr);
 
     return next_cell;
 }
-static void delete2(struct cell* head, uint8_t n)
+static void delete2(Cell* head, uint8_t n)
 {
-    struct cell *p = head;
-    struct cell *p_old = NULL;
+    Cell *p = head;
+    Cell *p_old = NULL;
 
     for (uint8_t i = 0; i < n; i++) {
         if (p == NULL) return;
@@ -44,10 +44,10 @@ static void delete2(struct cell* head, uint8_t n)
     p_old->next = delete(p);
 }
 
-static void print(struct cell *head_ptr)
+static void print(Cell *head_ptr)
 {
     printf("head addr : %p\n", (void*)head_ptr);
-    struct cell *p=head_ptr;
+    Cell *p=head_ptr;
     while (p!=NULL)
     {
         printf("addr : %p / data : %d / next : %p\n", (void*)p, p->data, (void*)p->next);
@@ -59,7 +59,7 @@ static void print(struct cell *head_ptr)
 
 int main(void)
 {
-    struct cell c1,*head,*last;
+    Cell c1,*head,*last;
     head=&c1;
     c1.data=100;
     c1.next=NULL;
@@ -78,3 +78,5 @@ int main(void)
     delete2(head, 3);
     print(head);
 }
+
+// todo : 途中に挿入してみる
