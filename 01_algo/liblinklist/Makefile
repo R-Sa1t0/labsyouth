@@ -1,14 +1,23 @@
-souce_files = main.c liblist.c
+CC = gcc
+MAIN = linklist_test.c
+LIBS = liblinklist.c
+CFLAGS = -Wall -Wextra -O2
+DEBUGFLAGS_1 = -g -Wall -Wextra -fsanitize=memory
+DEBUGFLAGS_2 = -g -Wall -Wextra -fsanitize=address
 
-all: gcc exec
+all: gcc clang exec
 
-full: gcc clang vexec
+test: debug vexec
 
 gcc:
-	gcc -g -Wall -Wextra $(souce_files)
+	gcc $(CFLAGS) $(MAIN) $(LIBS)
 
 clang:
-	clang -g -Wall -Wextra -fsanitize=memory $(souce_files)
+	clang $(CFLAGS) $(MAIN) $(LIBS)
+
+debug: 
+	clang $(DEBUGFLAGS_1) $(MAIN) $(LIBS)
+	clang $(DEBUGFLAGS_2) $(MAIN) $(LIBS)
 
 vexec:
 	valgrind --leak-check=full ./a.out
