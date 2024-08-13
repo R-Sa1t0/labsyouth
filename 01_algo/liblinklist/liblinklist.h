@@ -1,4 +1,5 @@
-#pragma onece
+#ifndef LIBLINKLIST_H
+#define LIBLINKLIST_H
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -28,9 +29,12 @@ List* init_list();
 Cell* seek(List* l, size_t n);
 
 uint8_t append_cell(List* l, data_t v);
-uint8_t insert_cell(Cell* c, data_t v);
+uint8_t insert_cell(List* l, Cell* c, data_t v);
 
 uint8_t delete_headcell(List* l);
 uint8_t delete_tailcell(List* l);
 uint8_t delete_nextcell(List* l, Cell* c);
+uint8_t delete_cell(List* l, Cell* c);
 uint8_t delete_list(List* l);
+
+#endif
