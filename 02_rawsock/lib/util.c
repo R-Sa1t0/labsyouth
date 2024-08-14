@@ -1,5 +1,8 @@
 #include "util.h"
 
+// todo : strncpy の安全バージョンを実装する
+// todo : defile noerrorを作る
+
 int get_lladdr(struct ether_addr *addr, const char *nic_name){
     struct ifreq ifr;
 
@@ -38,10 +41,9 @@ int parse_macaddr(struct ether_addr *addr, const char *addr_str) {
         for (int i = 0; i < 6; i++) {
             addr->ether_addr_octet[i] = (uint8_t)octets[i];
         }
-    } else {
-        return -1;
+        return 0;
     }
-    return 0;
+    return -1;
 }
 
 int open_rawsock_pernic(int *fd, const char* nic_name){

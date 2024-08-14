@@ -23,7 +23,6 @@ typedef struct{
     uint8_t v[BUFFER_SIZE];
     size_t len;
 }Buffer;
-
 void buffer_init(Buffer *buf){
     memset(buf->v, 0, BUFFER_SIZE);
     buf->len=0;

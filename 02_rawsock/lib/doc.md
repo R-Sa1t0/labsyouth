@@ -1,4 +1,5 @@
 ## Utils
+ライブラリを作るときは中ではpritfしない、エラーは返り値で出す
 ### buf.h : Buffer Management
 ```
 typedef struct{

@@ -1,17 +1,16 @@
+
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
 #include <sys/ioctl.h>
 #include <net/if.h>
 #include <unistd.h>
-#include <sys/ioctl.h>
-#include <net/if.h>
 
 #define INTERFACE_NAME "ens33"
 
 int main(int argc, char *argv[])
 {
-    struct ifreq ifr;
+    struct ifreq ifr = {};
     int sock_fd;
     char mac_addr[18];
 

@@ -28,6 +28,7 @@ static void display(cell_t* p)
     }
     puts("");
 }
+
 static cell_t* add_cell(cell_t* c, data_t v)
 {
     cell_t *nc=malloc(sizeof(cell_t));

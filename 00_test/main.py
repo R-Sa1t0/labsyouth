@@ -1,41 +1,39 @@
-import os
 import scapy.all as scapy
-import pyroute2.netns as netns
 
-def run_in_netns(ns_name, func, *args, **kwargs):
-    pid = os.getpid()
-    with netns(ns_name) as ns:
-        ns.fork()
-        result = func(*args, **kwargs)
-        return result
+def packet_to_scapy_code(packet):
+    layers = []
+    while packet:
+        layer = packet.__class__.__name__
+        fields = []
+        for field, value in packet.fields.items():
+            if isinstance(value, scapy.Packet):
+                break
+            fields.append(f"{field}={repr(value)}")
+        layer_str = f"scapy.{layer}({', '.join(fields)})"
+        layers.append(layer_str)
+        packet = packet.payload
+    return " / ".join(layers)
 
-def send_packet():
-    pkt = (
-        scapy.IP(src="10.0.0.1", dst="10.0.0.2")/
-        scapy.UDP(sport=1000, dport=2000)/
-        scapy.Raw("HELLO")
-    )
-    print(scapy.conf.ifaces)
-    scapy.send(pkt, iface="T1-N1", verbose=False)
-    exit(0)
+def raw_payload_to_scapy_code(raw_payload):
+    try:
+        inner_packet = scapy.Ether(raw_payload)
+        return packet_to_scapy_code(inner_packet)
+    except:
+        return f"scapy.Raw(load={repr(raw_payload)})"
 
-def recv_packet():
-    ex_pkt=(
-        scapy.Ether(dst="a6:00:00:00:00:11", src="a6:00:00:00:00:22") /
-        scapy.IPv6(src="fc00:1::2", dst="fc00:11::1") /
-        scapy.IPv6ExtHdrSegmentRouting(addresses=['fc00:11::1'], nh=143) /
-        scapy.Ether(src="a2:00:00:00:00:22", dst="a2:00:00:00:00:11") /
-        scapy.IP(src="10.0.0.1", dst="10.0.0.2")/
-        scapy.UDP(sport=1000, dport=2000)/
-        scapy.Raw("HELLO")
-    )
-    print(scapy.conf.ifaces)
-    sniffed = scapy.sniff(iface="T2-N1", timeout=10, count=1)
-    for pkt in sniffed:
-        parsed_pkt = scapy.Ether(bytes(pkt))
-        if parsed_pkt == ex_pkt:
-            print("Received specified packet, exiting.")
-            exit(0)
+def process_packet(packet):
+    scapy_code = packet_to_scapy_code(packet)
+    if scapy.Raw in packet:
+        raw_payload_code = raw_payload_to_scapy_code(packet[scapy.Raw].load)
+        scapy_code += f" / {raw_payload_code}"
+    return scapy_code
 
-run_in_netns("T2", recv_packet)
-run_in_netns("T1", send_packet)
+packets = scapy.rdpcap('captured_packets.pcap')
+
+with open('packets_as_scapy_code.py', 'w') as f:
+    for packet in packets:
+        scapy_code = process_packet(packet)
+        f.write(f"{scapy_code}\n\n")
+        print(scapy_code)
+
+print("パケットの書き出しが完了しました。")

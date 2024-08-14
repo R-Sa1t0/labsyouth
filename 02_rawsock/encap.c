@@ -52,7 +52,7 @@ int parse_arg(arg *result, const int argc, const char *argv[]){
         perror("strdup");
         return -5;
     }
-    if ((parse_macaddr(&result->dst_mac, argv[5]))!=1) {
+    if ((parse_macaddr(&result->dst_mac, argv[5]))!=0) {
         fprintf(stderr, "Invalid destination mac address: %s\n", argv[5]);
         return -6;
     }
@@ -108,6 +108,8 @@ int main(int argc, char *argv[]){
     int lan_fd, wan_fd; //open_pernic_rawsock(config.lan_nic_name);
     if ((open_rawsock_pernic(&lan_fd, config.lan_nic_name))<0) exit(EXIT_FAILURE);
     if ((open_rawsock_pernic(&wan_fd, config.wan_nic_name))<0) exit(EXIT_FAILURE);
+    for (size_t i = 0; i < 6; i++) printf("%02x", config.dst_mac.ether_addr_octet[i]);
+    for (size_t i = 0; i < 6; i++) printf("%02x", config.wan_mac.ether_addr_octet[i]);
 
 
     struct sockaddr_ll dst_addr;

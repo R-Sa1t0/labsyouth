@@ -1,5 +1,7 @@
-#ifndef LIBLINKLIST_H
-#define LIBLINKLIST_H
+#pragma onece
+
+//#ifndef LIBLINKLIST_H
+//#define LIBLINKLIST_H
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -18,7 +20,6 @@ typedef struct list{
     size_t n;
 }List;
 
-void errExit(const char* msg);
 
 uint8_t display_list(List* l);
 
@@ -37,4 +38,4 @@ uint8_t delete_nextcell(List* l, Cell* c);
 uint8_t delete_cell(List* l, Cell* c);
 uint8_t delete_list(List* l);
 
-#endif
+//#endif

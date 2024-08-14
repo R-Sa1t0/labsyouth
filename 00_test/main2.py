@@ -24,12 +24,12 @@ def raw_payload_to_scapy_code(raw_payload):
 
 def process_packet(packet):
     scapy_code = packet_to_scapy_code(packet)
-    
     if scapy.Raw in packet:
         raw_payload_code = raw_payload_to_scapy_code(packet[scapy.Raw].load)
         scapy_code += f" / {raw_payload_code}"
-    
+    print(packet)
     return scapy_code
+
 
 def packet_callback(packet):
     scapy_code = process_packet(packet)
