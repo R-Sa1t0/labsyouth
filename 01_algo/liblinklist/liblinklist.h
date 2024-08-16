@@ -8,14 +8,16 @@
 typedef uint32_t data_t;
 
 // Node
-typedef struct cell {
-    data_t data;
-    struct cell* next;
+typedef struct cell
+{
+  data_t data;
+  struct cell* next;
 } Cell;
-typedef struct list {
-    Cell* head;
-    Cell* tail;
-    size_t n;
+typedef struct list
+{
+  Cell* head;
+  Cell* tail;
+  size_t n;
 } List;
 
 // boolにする

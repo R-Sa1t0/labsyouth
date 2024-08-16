@@ -1,13 +1,13 @@
-CC = gcc
+CC = clang-19
 MAIN = linklist_test.c
 LIBS = liblinklist.c
 CFLAGS = -Wall -Wextra -O2
 DEBUGFLAGS_1 = -g -Wall -Wextra -fsanitize=memory
 DEBUGFLAGS_2 = -g -Wall -Wextra -fsanitize=address
 
-all: format gcc clang exec
+all: format build exec
 
-test: format debug vexec
+test: format debug-build vexec
 
 format:
 	@for file in *.c *.h; do \
@@ -16,15 +16,12 @@ format:
 		fi; \
 	done
 
-gcc:
-	gcc $(CFLAGS) $(MAIN) $(LIBS)
+build:
+	$(CC) $(CFLAGS) $(MAIN) $(LIBS)
 
-clang:
-	clang $(CFLAGS) $(MAIN) $(LIBS)
-
-debug: 
-	clang $(DEBUGFLAGS_1) $(MAIN) $(LIBS)
-	clang $(DEBUGFLAGS_2) $(MAIN) $(LIBS)
+debug-build: 
+	$(CC) $(DEBUGFLAGS_1) $(MAIN) $(LIBS)
+	$(CC) $(DEBUGFLAGS_2) $(MAIN) $(LIBS)
 
 vexec:
 	valgrind --leak-check=full ./a.out
