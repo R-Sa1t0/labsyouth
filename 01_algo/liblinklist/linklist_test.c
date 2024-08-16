@@ -4,23 +4,15 @@
 #include "liblinklist.h"
 
 //エラー時のスタックトレースを取りたい
-void
-errExit(const char* msg)
-{
+void errExit(const char *msg) {
   printf("ERROR: %s\n", msg);
   exit(1);
 }
-void
-warn(const char* msg)
-{
-  printf("WARN: %s\n", msg);
-}
+void warn(const char *msg) { printf("WARN: %s\n", msg); }
 
-int
-main(void)
-{
+int main(void) {
   printf("init\n");
-  List* l = init_list();
+  List *l = init_list();
   if (l == NULL)
     exit(1);
   display_list(l);
