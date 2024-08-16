@@ -1,0 +1,44 @@
+nodes:
+  - name: N1
+    type: netns
+    interfaces:
+      - { name: N1-T1, type: direct, args: T1#T1-N1, addr: a2:00:00:00:00:22}
+      - { name: N1-T2, type: direct, args: T2#T2-N1, addr: a6:00:00:00:00:22}
+  - name: T1
+    type: netns
+    interfaces:
+      - { name: T1-N1, type: direct, args: N1#N1-T1, addr: a2:00:00:00:00:11}
+  - name: T2
+    type: netns
+    interfaces:
+      - { name: T2-N1, type: direct, args: N1#N1-T2, addr: a6:00:00:00:00:11}
+
+
+node_configs:
+# worker
+  - name: N1
+    cmds:
+     - cmd: ip link set N1-T1 promisc on
+     - cmd: ip -6 addr add fc00:1::2/64 dev N1-T2  # underlay
+     - cmd: ip -6 route add fc00:11::/64 via fc00:1::1  # for SID
+
+# sender
+  - name: T1
+    cmds:
+     - cmd: ip addr add 10.0.0.1/24 dev T1-N1
+     - cmd: ip neigh replace 10.0.0.2 lladdr a2:00:00:00:00:22 dev T1-N1
+
+# receiver
+  - name: T2
+    cmds:
+     - cmd: ip link set T2-N1 promisc on
+     - cmd: ip -6 addr add fc00:1::1/64 dev T2-N1
+
+
+test: 
+  - name: N1-T1
+    cmds:
+     - cmd: ip netns exec N1 ping fc00:1::2
+  - name: T1-N1
+    cmds:
+     - cmd: ip netns exec N1 ping fc00:1::1

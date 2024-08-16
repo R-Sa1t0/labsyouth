@@ -14,77 +14,11 @@
 #include <net/if.h>  //struct ifreq
 #include <linux/if_packet.h> //sockaddr_ll
 
+#include "lib/buf.h"
+#include "lib/util.h"
+
 // sudo ip netns exec IN1 ./a.out fc00:1::2 fc00:12::1 IN1-IC1 IN1-IR1 fe:6a:96:11:e7:1c
-// sudo ip netns exec IN2 ./a.out fc00:2::@ fc00:11::1 IN2-IC2 IN2-IR1 5e:93:21:63:f5:cd
-
-#define BUFFER_SIZE 1550
-typedef struct{
-    uint8_t v[BUFFER_SIZE];
-    size_t len;
-}Buffer;
-void buffer_init(Buffer *buf){
-    memset(buf->v, 0, BUFFER_SIZE);
-    buf->len=0;
-}
-void (*buffer_clear)() = buffer_init; //alias
-void buffer_append(Buffer *buf, const uint8_t *data, size_t data_size){
-    if (buf->len+data_size>BUFFER_SIZE){
-        fprintf(stderr, "BUF_ERR: buffer full\n");
-        exit(1);
-    }
-    memcpy(buf->v+buf->len, data, data_size);
-    buf->len+=data_size;
-}
-void buffer_print(Buffer *buf){
-    for (int i=0; i<buf->len; i++) printf("%02x ", ((uint8_t *)buf->v)[i]);
-    puts("");
-}
-
-struct ether_addr get_macaddr(const char *nic_name){
-    struct ifreq ifr;
-    struct ether_addr addr;
-
-    int sock_fd = socket(AF_INET, SOCK_DGRAM, 0);
-    if (sock_fd < 0) {
-        perror("socket");
-        exit(EXIT_FAILURE);
-    }
-    
-    if (strlen(nic_name) < IFNAMSIZ) {
-        strcpy(ifr.ifr_name, nic_name);
-    } else {
-        strncpy(ifr.ifr_name, nic_name, IFNAMSIZ - 1);
-        ifr.ifr_name[IFNAMSIZ - 1] = '\0';
-    }
-    //strncpy(ifr.ifr_name, nic_name, IFNAMSIZ - 1);
-
-    if (ioctl(sock_fd, SIOCGIFHWADDR, &ifr) < 0) {
-        perror("ioctl");
-        close(sock_fd);
-        exit(EXIT_FAILURE);
-    }
-    close(sock_fd);
-
-    for (int i=0; i<6; i++){
-        addr.ether_addr_octet[i]=(uint8_t)ifr.ifr_hwaddr.sa_data[i];
-    }
-
-    return addr; 
-}
-
-int parse_macaddr(struct ether_addr *addr, const char *addr_str) {
-    unsigned int octets[6];
-    if (sscanf(addr_str, "%x:%x:%x:%x:%x:%x", 
-               &octets[0], &octets[1], &octets[2], 
-               &octets[3], &octets[4], &octets[5]) == 6) {
-        for (int i = 0; i < 6; i++) {
-            addr->ether_addr_octet[i] = (uint8_t)octets[i];
-        }
-    } else {
-        return -1;
-    }
-    return 1;
-}
+// sudo ip netns exec IN2 ./a.out fc00:2::2 fc00:11::1 IN2-IC2 IN2-IR1 5e:93:21:63:f5:cd
 
 typedef struct {
     struct in6_addr ip6_srcaddr;
@@ -95,73 +29,40 @@ typedef struct {
     struct ether_addr wan_mac;
     struct ether_addr dst_mac;
 }arg;
-arg parse_arg(int argc, char *argv[]){
-    arg result;
+int parse_arg(arg *result, const int argc, const char *argv[]){
     if (argc != 6) {
         fprintf(stderr, "Usage: %s [srcaddr] [dstaddr] [lan-side-nic-name] [wan-side-nic-name] [dst mac addr]\n", argv[0]);
-        exit(EXIT_FAILURE);
+        return -1;
     }
-    if (inet_pton(AF_INET6, argv[1], &result.ip6_srcaddr) != 1) {
+    if (inet_pton(AF_INET6, argv[1], &result->ip6_srcaddr) != 1) {
         fprintf(stderr, "Invalid source IPv6 address: %s\n", argv[1]);
-        exit(EXIT_FAILURE);
+        return -2;
     }
-    if (inet_pton(AF_INET6, argv[2], &result.ip6_dstaddr) != 1) {
+    if (inet_pton(AF_INET6, argv[2], &result->ip6_dstaddr) != 1) {
         fprintf(stderr, "Invalid destination IPv6 address: %s\n", argv[2]);
-        exit(EXIT_FAILURE);
+        return -3;
     }
-    result.lan_nic_name = strdup(argv[3]);
-    if (result.lan_nic_name == NULL) {
+    result->lan_nic_name = strdup(argv[3]);
+    if (result->lan_nic_name == NULL) {
         perror("strdup");
-        exit(EXIT_FAILURE);
+        return -4;
     }
-    result.wan_nic_name = strdup(argv[4]);
-    if (result.wan_nic_name == NULL) {
+    result->wan_nic_name = strdup(argv[4]);
+    if (result->wan_nic_name == NULL) {
         perror("strdup");
-        exit(EXIT_FAILURE);
+        return -5;
     }
-    if ((parse_macaddr(&result.dst_mac, argv[5]))!=1) {
+    if ((parse_macaddr(&result->dst_mac, argv[5]))!=0) {
         fprintf(stderr, "Invalid destination mac address: %s\n", argv[5]);
-        exit(EXIT_FAILURE);
+        return -6;
     }
-    result.lan_mac = get_macaddr(result.lan_nic_name);
-    result.wan_mac = get_macaddr(result.wan_nic_name);
-    return result;
+    if ((get_lladdr(&result->lan_mac, result->lan_nic_name))!=0) return -1;
+    if ((get_lladdr(&result->wan_mac, result->wan_nic_name))!=0) return -1;
+    return 0;
 }
-int open_pernic_rawsock(char* nic_name){
-    int fd;
-    struct ifreq ifr;
-    printf("ok-rawsock\n");
-    fd = socket(AF_INET, SOCK_DGRAM, 0);
-    if (fd < 0) {
-        fprintf(stderr, "Failed to create socket\n");
-        exit(EXIT_FAILURE);
-    }
-    printf("ok-rawsock1\n");
-    strncpy(ifr.ifr_name, nic_name, IFNAMSIZ - 1);
-    if (ioctl(fd, SIOCGIFINDEX, &ifr) == -1) {
-        fprintf(stderr, "ioctl SIOCGIFINDEX failed: %s\n", strerror(errno));
-        exit(EXIT_FAILURE);
-    }
 
-    fd = socket(PF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
-    if (fd < 0) {
-        fprintf(stderr, "Failed to create socket\n");
-        exit(EXIT_FAILURE);
-    }
-    printf("ok-rawsock2\n");
-
-    struct sockaddr_ll addr;
-    memset(&addr, 0x00, sizeof(addr));
-    addr.sll_family = AF_PACKET;
-    addr.sll_protocol = htons(ETH_P_ALL);
-    addr.sll_ifindex = ifr.ifr_ifindex;
-    if (bind(fd, (struct sockaddr *)&addr, sizeof(addr)) == -1) {
-        fprintf(stderr, "bind failed: %s\n", strerror(errno));
-        exit(EXIT_FAILURE);
-    }
-    return fd;
-}
-Buffer do_seg6encap(arg config, Buffer* payload){
+// TODO : 返り値はエラー、結果格納用のポインタを渡すようにする
+Buffer do_seg6encap(arg config, const Buffer* payload){
     Buffer tmpbuf;
     buffer_init(&tmpbuf);
     
@@ -202,13 +103,14 @@ Buffer do_seg6encap(arg config, Buffer* payload){
 }
 
 int main(int argc, char *argv[]){
-    printf("1\n");
-    arg config = parse_arg(argc, argv);
-    printf("2\n");
-    int lan_fd = open_pernic_rawsock(config.lan_nic_name);
-    printf("3\n");
-    int wan_fd = open_pernic_rawsock(config.wan_nic_name);
-    fprintf(stdout ,"socket opened!\n");
+    arg config;
+    if ((parse_arg(&config, argc, (const char **)argv))<0) exit(1);
+    int lan_fd, wan_fd; //open_pernic_rawsock(config.lan_nic_name);
+    if ((open_rawsock_pernic(&lan_fd, config.lan_nic_name))<0) exit(EXIT_FAILURE);
+    if ((open_rawsock_pernic(&wan_fd, config.wan_nic_name))<0) exit(EXIT_FAILURE);
+    for (size_t i = 0; i < 6; i++) printf("%02x", config.dst_mac.ether_addr_octet[i]);
+    for (size_t i = 0; i < 6; i++) printf("%02x", config.wan_mac.ether_addr_octet[i]);
+
 
     struct sockaddr_ll dst_addr;
     memset(&dst_addr, 0, sizeof(dst_addr));
