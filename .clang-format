@@ -1,0 +1,4 @@
+BasedOnStyle: webkit
+
+BreakBeforeBraces: WebKit
+AlwaysBreakAfterReturnType: All
