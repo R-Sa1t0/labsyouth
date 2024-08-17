@@ -8,9 +8,9 @@
 typedef uint32_t data_t;
 
 // Node
-typedef struct cell {
+typedef struct node {
   data_t data;
-  struct cell *next;
+  struct node *next;
 } Cell;
 typedef struct list {
   Cell *head;
@@ -18,22 +18,26 @@ typedef struct list {
   size_t n;
 } List;
 
+// Cellの表示
 bool display_cells(const Cell *head);
-bool display_list(const List *l);
-
+// Cellの初期化
 Cell *cell_init(data_t v);
+// Cellの追加 (追加したCellのポインタを返す)
 Cell *cell_append(Cell *c, data_t v);
+// Cellの削除 (Cell->nextを返す)
 Cell *cell_delete(Cell *c);
-// n番目のポインタ (nは0から)
-Cell *seek(List *l, size_t n);
 
+// Listの表示
+bool display_list(const List *l);
+// Listの初期化
 List *init_list();
-
-uint8_t append_cell(List *l, data_t v);
-uint8_t insert_cell(List *l, Cell *c, data_t v);
-
-uint8_t delete_headcell(List *l);
-uint8_t delete_tailcell(List *l);
-uint8_t delete_nextcell(List *l, Cell *c);
-uint8_t delete_cell(List *l, Cell *c);
+// Listの削除
 uint8_t delete_list(List *l);
+// List内のn番目のポインタの取得 (nは0から)
+Cell *seek(List *l, size_t n);
+// Listへ要素追加
+uint8_t list_append(List *l, data_t v);
+// Listへ要素挿入
+uint8_t list_insert(List *l, Cell *c, data_t v);
+// Listの要素削除
+uint8_t list_delete_cell(List *l, Cell *c);

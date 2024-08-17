@@ -7,7 +7,7 @@ DEBUGFLAGS_2 = -g -Wall -Wextra -fsanitize=address
 
 all: format build exec
 
-test: format debug-build vexec
+debug: format sanitize build vexec
 
 format:
 	@for file in *.c *.h; do \
@@ -19,7 +19,7 @@ format:
 build:
 	$(CC) $(CFLAGS) $(MAIN) $(LIBS)
 
-debug-build: 
+sanitize: 
 	$(CC) $(DEBUGFLAGS_1) $(MAIN) $(LIBS)
 	$(CC) $(DEBUGFLAGS_2) $(MAIN) $(LIBS)
 
