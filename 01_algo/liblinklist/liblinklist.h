@@ -18,16 +18,16 @@ typedef struct list {
   size_t n;
 } List;
 
-// boolにする
-uint8_t display_list(List *l);
+bool display_cells(const Cell *head);
+bool display_list(const List *l);
 
-List *
-
-init_list();
-// uint8_t delete_list(List* l);
-
+Cell *cell_init(data_t v);
+Cell *cell_append(Cell *c, data_t v);
+Cell *cell_delete(Cell *c);
 // n番目のポインタ (nは0から)
 Cell *seek(List *l, size_t n);
+
+List *init_list();
 
 uint8_t append_cell(List *l, data_t v);
 uint8_t insert_cell(List *l, Cell *c, data_t v);

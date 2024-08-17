@@ -1,4 +1,4 @@
-CC = clang-19
+CC = clang-18
 MAIN = linklist_test.c
 LIBS = liblinklist.c
 CFLAGS = -Wall -Wextra -O2

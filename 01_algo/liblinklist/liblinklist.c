@@ -4,21 +4,61 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-uint8_t display_list(List *l) {
+bool display_cells(const Cell *head) {
+  if (head == NULL)
+    return false;
+
+  Cell *temp = (Cell *)head;
+  while (temp != NULL) {
+    printf("addr: %p, data: %d, next: %p\n", temp, temp->data, temp->next);
+    temp = temp->next;
+  }
+
+  return true;
+}
+
+bool display_list(const List *l) {
   printf("head: %p, tail: %p, len: %zu\n", l->head, l->tail, l->n);
+  if ((display_cells(l->head)) != true)
+    return false;
+
   Cell *c = l->head;
   size_t n = 0;
-
   while (c != NULL) {
-    printf("addr: %p, data: %d, next: %p\n", c, c->data, c->next);
     c = c->next;
     n++;
   }
-  if (n != l->n)
+  if (n != l->n) {
     printf("ERROR : n != l->n, n: %zu\n", n);
+    return false;
+  }
 
   puts("");
   return true;
+}
+
+Cell *cell_init(data_t v) {
+  Cell *new_cell = (Cell *)malloc(sizeof(Cell));
+  if (new_cell == NULL)
+    return NULL;
+  new_cell->data = v;
+  new_cell->next = NULL;
+  return new_cell;
+}
+
+Cell *cell_append(Cell *c, data_t v) {
+  Cell *new_cell = cell_init(v);
+  if (new_cell == NULL)
+    return NULL;
+
+  c->next = new_cell;
+  return new_cell;
+}
+
+Cell *cell_delete(Cell *c) {
+  Cell *next = c->next;
+  free(c);
+  return next;
 }
 
 List *init_list() {

@@ -1,5 +1,6 @@
 .vscode/*
 */bin
+*/a.out
 testdir/*
 */spec_old.yaml
 */spec_old2.yaml
