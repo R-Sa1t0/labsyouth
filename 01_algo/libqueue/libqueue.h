@@ -3,6 +3,7 @@
 #include "../liblinklist/liblinklist.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 typedef struct queue {
   Cell *head;
