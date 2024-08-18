@@ -34,14 +34,16 @@ bool push(Queue *q, data_t v) {
 
   if (q->head == NULL && q->tail == NULL) {
     Cell *new = cell_init(v);
+    if (new == NULL)
+      return false;
     q->head = q->tail = new;
-    return true;
+  } else {
+    Cell *new = cell_append(q->tail, v);
+    if (new == NULL)
+      return false;
+    q->tail = new;
   }
 
-  Cell *new = cell_append(q->tail, v);
-  if (new == NULL)
-    return false;
-  q->tail = new;
 
   return true;
 }
