@@ -27,6 +27,8 @@ Cell *cell_init(data_t v) {
 }
 
 Cell *cell_delete(Cell *c) {
+  if (c == NULL)
+    return NULL;
   Cell *next = c->next;
   free(c);
   return next;
