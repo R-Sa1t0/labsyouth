@@ -26,6 +26,14 @@ Cell *cell_init(data_t v) {
   return new_cell;
 }
 
+Cell *cell_append(Cell *c, data_t v){
+  Cell *new = cell_init(v);
+  if (new == NULL) return NULL;
+
+  c->next = new;
+  return new;
+}
+
 Cell *cell_delete(Cell *c) {
   if (c == NULL)
     return NULL;
