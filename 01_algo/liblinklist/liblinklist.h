@@ -32,12 +32,12 @@ bool display_list(const List *l);
 // Listの初期化
 List *init_list();
 // Listの削除
-uint8_t delete_list(List *l);
+bool delete_list(List *l);
 // List内のn番目のポインタの取得 (nは0から)
 Cell *seek(List *l, size_t n);
 // Listへ要素追加
-uint8_t list_append(List *l, data_t v);
+bool list_append(List *l, data_t v);
 // Listへ要素挿入
-uint8_t list_insert(List *l, Cell *c, data_t v);
+bool list_insert(List *l, Cell *c, data_t v);
 // Listの要素削除
-uint8_t list_delete_cell(List *l, Cell *c);
+bool list_delete_cell(List *l, Cell *c);

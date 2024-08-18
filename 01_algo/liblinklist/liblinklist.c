@@ -62,7 +62,7 @@ List *init_list() {
   return l;
 }
 
-uint8_t delete_list(List *l) {
+bool delete_list(List *l) {
   if (l->head == NULL) {
     return false;
   } else if (l->tail == NULL) {
@@ -102,7 +102,7 @@ Cell *seek(List *l, size_t n) {
   return NULL;
 }
 
-uint8_t list_append(List *l, data_t v) {
+bool list_append(List *l, data_t v) {
   Cell *nc = (Cell *)malloc(sizeof(Cell));
   if (nc == NULL)
     return false;
@@ -121,7 +121,7 @@ uint8_t list_append(List *l, data_t v) {
   return true;
 }
 
-uint8_t list_insert(List *l, Cell *c, data_t v) {
+bool list_insert(List *l, Cell *c, data_t v) {
   Cell *nc = cell_init(v);
   if (nc == NULL)
     return false;
@@ -134,7 +134,7 @@ uint8_t list_insert(List *l, Cell *c, data_t v) {
   return true;
 }
 
-uint8_t list_delete_cell(List *l, Cell *c) {
+bool list_delete_cell(List *l, Cell *c) {
   if (l == NULL || c == NULL) {
     return false;
   }
