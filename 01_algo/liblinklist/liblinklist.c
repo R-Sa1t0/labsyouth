@@ -73,9 +73,7 @@ List *init_list() {
 }
 
 bool delete_list(List *l) {
-  if (l->head == NULL) {
-    return false;
-  } else if (l->tail == NULL) {
+  if (l->head == NULL || l->tail == NULL) {
     return false;
   } else {
     while (true) {
