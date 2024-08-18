@@ -1,6 +1,6 @@
 CC = clang-18
-MAIN = linklist_test.c
-LIBS = liblinklist.c
+MAIN = libqueue_test.c
+LIBS = libqueue.c ../liblinklist/liblinklist.c
 CFLAGS = -Wall -Wextra -O2
 DEBUGFLAGS_1 = -g -Wall -Wextra -fsanitize=memory
 DEBUGFLAGS_2 = -g -Wall -Wextra -fsanitize=address

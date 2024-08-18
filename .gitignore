@@ -1,5 +1,3 @@
-.vscode/*
+.vscode
+a.out
 */bin
-testdir/*
-*/spec_old.yaml
-*/spec_old2.yaml
