@@ -30,7 +30,8 @@ Cell *cell_append(Cell *c, data_t v){
   Cell *new = cell_init(v);
   if (new == NULL) return NULL;
 
-  c->next = new;
+  if (c != NULL)
+    c->next = new;
   return new;
 }
 
