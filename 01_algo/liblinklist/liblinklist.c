@@ -4,12 +4,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-bool display_cells(const Cell *cell) {
+void display_cells(const Cell *cell) {
   while (cell != NULL) {
     printf("addr: %p, data: %d, next: %p\n", cell, cell->data, cell->next);
     cell = cell->next;
   }
-  return true;
 }
 
 Cell *cell_init(data_t v) {
@@ -41,8 +40,7 @@ Cell *cell_delete(Cell *c) {
 
 bool display_list(const List *l) {
   printf("head: %p, tail: %p, len: %zu\n", l->head, l->tail, l->n);
-  if ((display_cells(l->head)) != true)
-    return false;
+  display_cells(l->head);
 
   Cell *c = l->head;
   size_t n = 0;

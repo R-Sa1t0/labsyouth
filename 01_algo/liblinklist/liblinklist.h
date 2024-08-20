@@ -19,7 +19,7 @@ typedef struct list {
 } List;
 
 // Cellの表示
-bool display_cells(const Cell *head);
+void display_cells(const Cell *head);
 // Cellの初期化
 Cell *cell_init(data_t v);
 // Cellの追加 (追加したCellのポインタを返す)
