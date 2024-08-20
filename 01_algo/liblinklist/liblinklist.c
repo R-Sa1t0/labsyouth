@@ -5,9 +5,6 @@
 #include <stdlib.h>
 
 bool display_cells(const Cell *head) {
-  if (head == NULL)
-    return false;
-
   Cell *temp = (Cell *)head;
   while (temp != NULL) {
     printf("addr: %p, data: %d, next: %p\n", temp, temp->data, temp->next);

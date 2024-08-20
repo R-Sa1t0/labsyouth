@@ -19,6 +19,7 @@
 
 // charは最大値が127までしか保証されてないので，uint8_tを使う
 #define BUFFER_SIZE 1500
+
 typedef struct{
     uint8_t v[BUFFER_SIZE];
     size_t len;

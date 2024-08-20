@@ -1,9 +1,9 @@
 #include "libqueue.h"
 #include "../liblinklist/liblinklist.h"
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
 
 Queue *queue_init() {
   Queue *q = (Queue *)malloc(sizeof(Queue));
@@ -43,7 +43,6 @@ bool push(Queue *q, data_t v) {
       return false;
     q->tail = new;
   }
-
 
   return true;
 }
