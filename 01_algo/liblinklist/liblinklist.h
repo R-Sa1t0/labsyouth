@@ -19,8 +19,10 @@ void display_cells(const Cell *head);
 Cell *cell_init(data_t v);
 // Cellの追加 (追加したCellのポインタを返す / cはNULLではいけない / Cはリスト末尾である必要がある) 
 Cell *cell_append(Cell *c, data_t v);
+// Cellの全削除
+void cell_alldelete(Cell *head);
 /*
-Memo : 
+実装メモ : 
 1:
 途中{のノードを削除, にノード挿入}する関数を実装すると
  - 指定したアドレスの次のノードを削除する

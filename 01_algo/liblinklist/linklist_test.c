@@ -11,5 +11,4 @@ void errExit(const char *msg) {
 void warn(const char *msg) { printf("WARN: %s\n", msg); }
 
 int main(void) {
-  puts("Hello!");
 }

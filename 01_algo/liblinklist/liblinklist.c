@@ -32,3 +32,12 @@ Cell *cell_append(Cell *c, data_t v) {
 
   return new;
 }
+
+void cell_alldelete(Cell *head){
+  Cell *tmp = NULL;
+  while (head) {
+    tmp = head;
+    head = head->next;
+    free(tmp);
+  }
+}
