@@ -7,11 +7,14 @@
 
 typedef struct stack {
   Cell *head;
-  Cell *tail;
 } Stack;
 
+// Stackの初期化 (空のスタックへのポインタを返す)
 Stack *stack_init();
-bool stack_delete(Stack *s);
+// Stackの全削除
+void stack_delete(Stack *s);
 
+// Stackへのデータ追加
 bool push(Stack *s, data_t v);
+// Stackのデータ読み出し
 bool pop(Stack *s, data_t *v);

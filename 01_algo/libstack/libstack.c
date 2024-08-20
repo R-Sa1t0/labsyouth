@@ -9,36 +9,31 @@ Stack *stack_init() {
   Stack *new = (Stack *)malloc(sizeof(Stack));
   if (new == NULL)
     return NULL;
-  new->head = new->tail = NULL;
+  new->head = NULL;
   return new;
 }
 
-bool stack_delete(Stack *s) {
-  while (true) {
-    if (s->head == NULL) {
-      s->tail = NULL;
-      break;
-    }
-    s->head = cell_delete(s->head);
-  }
+void stack_delete(Stack *s) {
+  if (s == NULL)
+    return;
 
+  cell_alldelete(s->head);
   free(s);
-  s = NULL;
 
-  return true;
+  return;
 }
 
 bool push(Stack *s, data_t v) {
   if (s == NULL)
     return false;
 
-  if (s->head == NULL && s->tail == NULL) {
+  if (s->head == NULL) {
     Cell *new = cell_init(v);
     if (new == NULL)
       return false;
-    s->head = s->tail = new;
+    s->head = new;
   } else {
-    Cell *new = cell_append(NULL, v);
+    Cell *new = cell_init(v);
     if (new == NULL)
       return false;
     new->next = s->head;
@@ -49,14 +44,14 @@ bool push(Stack *s, data_t v) {
 }
 
 bool pop(Stack *s, data_t *v) {
-  if (s->head == NULL && s->tail == NULL)
+  if (s->head == NULL)
     return false;
 
   *v = s->head->data;
-  s->head = cell_delete(s->head);
-  if (s->head == NULL) {
-    s->tail = NULL;
-  }
+
+  Cell *tmp = s->head;
+  s->head = s->head->next;
+  free(tmp);
 
   return true;
 }
