@@ -21,15 +21,15 @@ Cell *cell_init(data_t v) {
 }
 
 Cell *cell_append(Cell *c, data_t v) {
-  if (c->next != NULL)
-    return false;
+  if (c == NULL || c->next != NULL)
+    return NULL;
 
   Cell *new = cell_init(v);
   if (new == NULL)
     return NULL;
 
-  if (c != NULL)
-    c->next = new;
+  c->next = new;
+
   return new;
 }
 

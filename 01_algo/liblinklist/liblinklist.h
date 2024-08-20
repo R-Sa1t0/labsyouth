@@ -22,8 +22,10 @@ typedef struct list {
 void display_cells(const Cell *head);
 // Cellの初期化
 Cell *cell_init(data_t v);
-// Cellの追加 (追加したCellのポインタを返す)
+// Cellの追加 (追加したCellのポインタを返す / cはNULLではいけない / Cはリスト末尾である必要がある) 
 Cell *cell_append(Cell *c, data_t v);
+// Todo : cとc->nextの間へのCell挿入
+// Cell *cell_insert(Cell *c, data_t v);
 // Cellの削除 (Cell->nextを返す)
 Cell *cell_delete(Cell *c);
 
