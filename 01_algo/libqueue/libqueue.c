@@ -41,7 +41,7 @@ bool push(Queue *q, data_t v) {
 }
 
 bool pop(Queue *q, data_t *v) {
-  if (q->head == NULL || q->tail == NULL)
+  if (q == NULL || q->head == NULL || q->tail == NULL)
     return false;
 
   *v = q->head->data;
