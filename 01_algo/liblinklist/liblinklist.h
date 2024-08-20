@@ -30,5 +30,3 @@ Memo :
 2: 
 先頭または末尾のノード削除はやることが単純(freeするだけ)なのでAPIに追加しない
 */
-// Cellの削除 (Cell->nextを返す)
-Cell *cell_delete(Cell *c);
