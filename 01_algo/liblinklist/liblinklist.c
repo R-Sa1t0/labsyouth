@@ -4,13 +4,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-bool display_cells(const Cell *head) {
-  Cell *temp = (Cell *)head;
-  while (temp != NULL) {
-    printf("addr: %p, data: %d, next: %p\n", temp, temp->data, temp->next);
-    temp = temp->next;
+bool display_cells(const Cell *cell) {
+  while (cell != NULL) {
+    printf("addr: %p, data: %d, next: %p\n", cell, cell->data, cell->next);
+    cell = cell->next;
   }
-
   return true;
 }
 
@@ -23,9 +21,10 @@ Cell *cell_init(data_t v) {
   return new_cell;
 }
 
-Cell *cell_append(Cell *c, data_t v){
+Cell *cell_append(Cell *c, data_t v) {
   Cell *new = cell_init(v);
-  if (new == NULL) return NULL;
+  if (new == NULL)
+    return NULL;
 
   if (c != NULL)
     c->next = new;
