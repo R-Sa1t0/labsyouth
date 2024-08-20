@@ -21,6 +21,9 @@ Cell *cell_init(data_t v) {
 }
 
 Cell *cell_append(Cell *c, data_t v) {
+  if (c->next != NULL)
+    return false;
+
   Cell *new = cell_init(v);
   if (new == NULL)
     return NULL;
