@@ -16,7 +16,7 @@ Queue *queue_init() {
 void queue_del(Queue *q) {
   if (q == NULL)
     return;
-  
+
   cell_alldelete(q->head);
   free(q);
 }
