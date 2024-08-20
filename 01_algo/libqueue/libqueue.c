@@ -13,19 +13,12 @@ Queue *queue_init() {
   return q;
 }
 
-bool queue_del(Queue *q) {
-  while (true) {
-    if (q->head == NULL) {
-      q->head = NULL;
-      break;
-    }
-    q->head = cell_delete(q->head);
-  }
-
+void queue_del(Queue *q) {
+  if (q == NULL)
+    return;
+  
+  cell_alldelete(q->head);
   free(q);
-  q = NULL;
-
-  return true;
 }
 
 bool push(Queue *q, data_t v) {
@@ -53,10 +46,9 @@ bool pop(Queue *q, data_t *v) {
 
   *v = q->head->data;
 
-  q->head = cell_delete(q->head);
-  if (q->head == NULL) {
-    q->tail = NULL;
-  }
+  Cell *tmp = q->head;
+  q->head = q->head->next;
+  free(tmp);
 
   return true;
 }

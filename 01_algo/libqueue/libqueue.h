@@ -10,8 +10,12 @@ typedef struct queue {
   Cell *tail;
 } Queue;
 
+// 初期化 (空のキューへのポインタを返す)
 Queue *queue_init();
-bool queue_del(Queue *q);
+// キューの削除
+void queue_del(Queue *q);
 
+// キューへのデータ追加
 bool push(Queue *q, data_t v);
+// キューからのデータ取り出し
 bool pop(Queue *q, data_t *v);
