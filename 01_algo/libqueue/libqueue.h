@@ -17,5 +17,5 @@ void queue_del(Queue *q);
 
 // キューへのデータ追加
 bool push(Queue *q, data_t v);
-// キューからのデータ取り出し
+// キューからのデータ取り出し (falseの場合はvにデータが入っていない)
 bool pop(Queue *q, data_t *v);

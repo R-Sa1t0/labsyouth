@@ -46,9 +46,7 @@ bool pop(Queue *q, data_t *v) {
 
   *v = q->head->data;
 
-  Cell *tmp = q->head;
-  q->head = q->head->next;
-  free(tmp);
+  cell_delete_and_seek_next(&q->head);
 
   return true;
 }
