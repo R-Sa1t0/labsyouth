@@ -1,0 +1,45 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#include "libdoublylinklist.h"
+
+int main() {
+  Node *center = node_new(0);
+  display_node(center);
+  puts("");
+
+  if ((node_add(1, center, 1)) != true)
+    exit(1);
+  display_node(center);
+  puts("");
+
+  if ((node_add(-1, center, 1)) != true)
+    exit(1);
+  display_node(center);
+  puts("");
+
+  for (int i = 2; i < 5; i++)
+    if ((node_add(1, node_seek(center, INT64_MAX), i)) != true)
+      exit(1);
+  display_node(center);
+  puts("");
+
+  for (int i = 2; i < 5; i++)
+    if ((node_add(-1, node_seek(center, INT64_MIN), i)) != true)
+      exit(1);
+  display_node(center);
+  puts("");
+
+  if ((node_delete(1, node_seek(center, 3))) != true)
+    exit(1);
+  display_node(center);
+  puts("");
+
+  if ((node_delete(-1, node_seek(center, -3))) != true)
+    exit(1);
+  display_node(center);
+  puts("");
+
+  if ((node_delete_all(center)) != true)
+    puts("err");
+}
