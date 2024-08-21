@@ -16,5 +16,5 @@ void stack_delete(Stack *s);
 
 // Stackへのデータ追加
 bool push(Stack *s, data_t v);
-// Stackのデータ読み出し
+// Stackのデータ読み出し (falseが戻った場合vにデータは入っていない)
 bool pop(Stack *s, data_t *v);

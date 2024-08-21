@@ -19,39 +19,32 @@ void stack_delete(Stack *s) {
 
   cell_alldelete(s->head);
   free(s);
-
-  return;
 }
 
 bool push(Stack *s, data_t v) {
   if (s == NULL)
     return false;
 
-  if (s->head == NULL) {
-    Cell *new = cell_init(v);
-    if (new == NULL)
-      return false;
-    s->head = new;
-  } else {
-    Cell *new = cell_init(v);
-    if (new == NULL)
-      return false;
+  Cell *new = cell_init(v);
+  if (new == NULL)
+    return false;
+
+  //   if (s->head) でもよい
+  if (s->head != NULL)
     new->next = s->head;
-    s->head = new;
-  }
+
+  s->head = new;
 
   return true;
 }
 
 bool pop(Stack *s, data_t *v) {
-  if (s->head == NULL)
+  if (s == NULL || s->head == NULL)
     return false;
 
   *v = s->head->data;
 
-  Cell *tmp = s->head;
-  s->head = s->head->next;
-  free(tmp);
+  cell_delete_and_seek_next(&(s->head));
 
   return true;
 }
