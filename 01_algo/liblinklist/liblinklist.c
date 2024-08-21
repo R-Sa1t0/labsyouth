@@ -11,6 +11,7 @@ void display_cells(const Cell *cell) {
   }
 }
 
+// Cell_newがいいかも
 Cell *cell_init(data_t v) {
   Cell *new_cell = (Cell *)malloc(sizeof(Cell));
   if (new_cell == NULL)
@@ -33,11 +34,14 @@ Cell *cell_append(Cell *c, data_t v) {
   return new;
 }
 
+void cell_delete_and_seek_next(Cell **c) {
+  Cell *tmp = *c;
+  *c = (*c)->next;
+  free(tmp);
+}
+
 void cell_alldelete(Cell *head) {
-  Cell *tmp = NULL;
   while (head) {
-    tmp = head;
-    head = head->next;
-    free(tmp);
+    cell_delete_and_seek_next(&head);
   }
 }

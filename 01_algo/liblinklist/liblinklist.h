@@ -20,6 +20,8 @@ Cell *cell_init(data_t v);
 // Cellの追加 (追加したCellのポインタを返す / cはNULLではいけない /
 // Cはリスト末尾である必要がある)
 Cell *cell_append(Cell *c, data_t v);
+// *cを削除して、*cを*c->nextで置き換える
+void cell_delete_and_seek_next(Cell **c);
 // Cellの全削除
 void cell_alldelete(Cell *head);
 /*
