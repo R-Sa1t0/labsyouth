@@ -5,10 +5,10 @@
 
 #include "libdoublylinklist.h"
 
-void display_node(Node *n) {
-  if (n == NULL)
+void display_node(const Node *node) {
+  if (node == NULL)
     return;
-  n = node_seek(n, INT64_MIN);
+  Node *n = node_seek(node, INT64_MIN);
   while (n) {
     printf("addr: %p, v: %u, prev: %p, next: %p\n", n, n->v, n->prev, n->next);
     n = n->next;
@@ -22,6 +22,12 @@ Node *node_new(data_t v) {
   new->next = new->prev = NULL;
   new->v = v;
   return new;
+}
+
+void node_delete_one(Node *n) {
+  n->prev->next = n->next;
+  n->next->prev = n->prev;
+  free(n);
 }
 
 bool node_delete(int8_t mode, Node *n) {
@@ -65,10 +71,11 @@ bool node_delete_all(Node *n) {
   return true;
 }
 
-Node *node_seek(Node *n, int64_t offset) {
+Node *node_seek(Node *n, const int64_t offset) {
   if (n == NULL)
     return NULL;
-  else if (offset == INT64_MAX)
+
+  if (offset == INT64_MAX)
     while (n->next)
       n = n->next;
   else if (offset == INT64_MIN)
@@ -85,6 +92,22 @@ Node *node_seek(Node *n, int64_t offset) {
     }
   }
   return n;
+}
+
+Node *node_insert(Node *n, data_t v) {
+  if (n == NULL)
+    return NULL;
+  Node *new = node_new(v);
+  if (new == NULL)
+    return NULL;
+
+  new->next = n->next;
+  new->prev = n;
+  n->next = new;
+  if (n->next != NULL)
+    n->next->prev = new;
+
+  return new;
 }
 
 bool node_add(int8_t mode, Node *n, data_t v) {

@@ -40,6 +40,20 @@ int main() {
   display_node(center);
   puts("");
 
+  node_delete_one(center->next);
+  display_node(center);
+  puts("");
+
+  if ((node_insert(center, 1)) == NULL)
+    exit(1);
+  display_node(center);
+  puts("");
+
+  if ((node_insert(center->next->next, 3)) == NULL)
+    exit(1);
+  display_node(center);
+  puts("");
+
   if ((node_delete_all(center)) != true)
     puts("err");
 }

@@ -14,16 +14,20 @@ typedef struct link_node {
 } Node;
 
 // ノードの表示
-void display_node(Node *n);
+void display_node(const Node *n);
 // 初期ノードの作成
 Node *node_new(data_t v);
 // ノードのつながり削除 (mode: -1で先頭方向すべて、1で末尾方向すべて、0はひとつ)
 bool node_delete(int8_t mode, Node *n);
+// ノードを1つ削除
+void node_delete_one(Node *n);
 // ノードの全削除 (どこを指定しても先頭まで辿り、そこから消していく)
 bool node_delete_all(Node *n);
 // シーク(nを起点とし、offset: +で末尾方向, -で先頭方向, INT64_MAXで末尾,
 // INT64_MINで先頭)
 Node *node_seek(Node *n, int64_t offset);
+// 指定したノードの次に、ノードを1つ挿入する
+Node *node_insert(Node *n, data_t v);
 // ノードの追加 (mode: -1はnの前に追加, 1はnの次に追加)
 bool node_add(int8_t mode, Node *n, data_t v);
 
