@@ -14,7 +14,7 @@ typedef struct link_node {
 } Node;
 
 // ノードの表示
-void display_node(const Node *n);
+void display_node(Node *n);
 // 初期ノードの作成
 Node *node_new(data_t v);
 // ノードのつながり削除 (mode: -1で先頭方向すべて、1で末尾方向すべて、0はひとつ)

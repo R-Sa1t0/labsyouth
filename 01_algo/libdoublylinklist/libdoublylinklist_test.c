@@ -39,7 +39,7 @@ int main() {
     exit(1);
   display_node(center);
   puts("");
-
+#if 0
   node_delete_one(center->next);
   display_node(center);
   puts("");
@@ -53,6 +53,13 @@ int main() {
     exit(1);
   display_node(center);
   puts("");
+
+
+  node_delete_one(node_seek(center, INT64_MAX));
+  display_node(center);
+  puts("");
+#else
+#endif
 
   if ((node_delete_all(center)) != true)
     puts("err");

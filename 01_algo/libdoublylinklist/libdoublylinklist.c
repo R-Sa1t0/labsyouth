@@ -5,13 +5,24 @@
 
 #include "libdoublylinklist.h"
 
-void display_node(const Node *node) {
-  if (node == NULL)
+void display_node(Node *node) {
+  if (node == NULL) {
+    puts("");
     return;
-  Node *n = node_seek(node, INT64_MIN);
-  while (n) {
-    printf("addr: %p, v: %u, prev: %p, next: %p\n", n, n->v, n->prev, n->next);
-    n = n->next;
+  }
+  node = node_seek(node, INT64_MIN);
+  while (node) {
+    printf("prev: %-14p, next: %-14p, addr: %p, v:%u\n", node->prev, node->next,
+           node, node->v);
+    if (node->prev != NULL && node->prev->next != node) {
+      printf("node->prev->next != node\n");
+      exit(1);
+    }
+    if ((node->next != NULL && node->next->prev != node)) {
+      printf("node->next->prev != node\n");
+      exit(1);
+    }
+    node = node->next;
   }
 }
 
@@ -25,8 +36,15 @@ Node *node_new(data_t v) {
 }
 
 void node_delete_one(Node *n) {
-  n->prev->next = n->next;
-  n->next->prev = n->prev;
+  if (n == NULL)
+    return;
+  printf("n:%p, prev:%p, next:%p\n", n, n->prev, n->next);
+
+  if (n->prev != NULL)
+    n->prev->next = n->next;
+  if (n->next != NULL)
+    n->next->prev = n->prev;
+
   free(n);
 }
 
