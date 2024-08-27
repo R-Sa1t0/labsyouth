@@ -20,7 +20,6 @@ void display_node(Node *node) {
     }
     if ((node->next != NULL && node->next->prev != node)) {
       printf("node->next->prev != node\n");
-      exit(1);
     }
     node = node->next;
   }
@@ -38,7 +37,6 @@ Node *node_new(data_t v) {
 void node_delete_one(Node *n) {
   if (n == NULL)
     return;
-  printf("n:%p, prev:%p, next:%p\n", n, n->prev, n->next);
 
   if (n->prev != NULL)
     n->prev->next = n->next;
@@ -48,43 +46,16 @@ void node_delete_one(Node *n) {
   free(n);
 }
 
-bool node_delete(int8_t mode, Node *n) {
-  if (n == NULL)
-    return false;
-  else if (mode == -1) {
-    n->next->prev = NULL;
-    while (n) {
-      Node *tmp = n;
-      n = n->prev;
-      free(tmp);
-    }
-  } else if (mode == 1) {
-    if (n != NULL && n->prev != NULL)
-      n->prev->next = NULL;
-    while (n) {
-      Node *tmp = n;
-      n = n->next;
-      free(tmp);
-    }
-  } else if (mode == 0) {
-    n->prev->next = n->next;
-    n->next->prev = n->prev;
-    free(n);
-  } else {
-    return false;
-  }
-  return true;
-}
-
 bool node_delete_all(Node *n) {
   if (n == NULL)
     return false;
 
-  Node *head_ptr = node_seek(n, INT64_MIN);
-
-  bool stat = node_delete(1, head_ptr);
-  if (stat != true)
-    return false;
+  n = node_seek(n, INT64_MIN);
+  while (n) {
+    Node *tmp = n;
+    n = n->next;
+    node_delete_one(tmp);
+  }
 
   return true;
 }
@@ -119,45 +90,27 @@ Node *node_insert(Node *n, data_t v) {
   if (new == NULL)
     return NULL;
 
-  new->next = n->next;
   new->prev = n;
-  n->next = new;
+  new->next = n->next;
   if (n->next != NULL)
     n->next->prev = new;
+  n->next = new;
 
   return new;
 }
 
-bool node_add(int8_t mode, Node *n, data_t v) {
+Node *node_insert_before(Node *n, data_t v) {
   if (n == NULL)
-    return false;
-
+    return NULL;
   Node *new = node_new(v);
-  if (mode == -1) {
-    if (n->prev != NULL) {
-      new->prev = n->prev;
-      new->next = n;
-      n->prev->next = new;
-      n->prev = new;
-    } else {
-      new->prev = NULL;
-      new->next = n;
-      n->prev = new;
-    }
-  } else if (mode == 1) {
-    if (n->next != NULL) {
-      new->prev = n;
-      new->next = n->next;
-      n->next->prev = new;
-      n->next = new;
-    } else {
-      new->next = NULL;
-      new->prev = n;
-      n->next = new;
-    }
-  } else {
-    free(new);
-    return false;
-  }
-  return true;
+  if (new == NULL)
+    return NULL;
+
+  new->prev = n->prev;
+  new->next = n;
+  if (n->prev != NULL)
+    n->prev->next = new;
+  n->prev = new;
+
+  return new;
 }
