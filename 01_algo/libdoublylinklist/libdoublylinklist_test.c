@@ -1,11 +1,15 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <assert.h>
 
 #include "libdoublylinklist.h"
 
 int main() {
   // node_new
   Node *center = node_new(0);
+  assert(center != NULL);
+  if (center == NULL) 
+    exit(1);
 
   // node_insert
   if (node_insert(center, 1) == NULL)
