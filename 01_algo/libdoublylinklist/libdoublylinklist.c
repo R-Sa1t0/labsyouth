@@ -5,15 +5,16 @@
 
 #include "libdoublylinklist.h"
 
-void display_node(Node *node) {
+void display_node(const Node *node) {
   if (node == NULL) {
     puts("");
     return;
   }
-  node = node_seek(node, INT64_MIN);
+
   while (node) {
     printf("prev: %-14p, next: %-14p, addr: %p, v:%u\n", node->prev, node->next,
            node, node->v);
+
     if (node->prev != NULL && node->prev->next != node) {
       printf("node->prev->next != node\n");
       exit(1);
@@ -46,11 +47,10 @@ void node_delete_one(Node *n) {
   free(n);
 }
 
-bool node_delete_all(Node *n) {
+bool node_delete_after(Node *n) {
   if (n == NULL)
     return false;
 
-  n = node_seek(n, INT64_MIN);
   while (n) {
     Node *tmp = n;
     n = n->next;
