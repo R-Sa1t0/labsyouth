@@ -5,7 +5,7 @@
 
 #include "libdoublylinklist.h"
 
-void display_node(const Node *node) {
+void dump_node(const Node *node) {
   if (node == NULL) {
     puts("");
     return;

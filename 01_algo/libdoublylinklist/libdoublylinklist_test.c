@@ -16,14 +16,14 @@ int main() {
   // node_insert
   if (node_insert(center, 1) == NULL)
     exit(1);
-  display_node(head);
+  dump_node(head);
   puts("");
 
   // node_insert_before
   head = node_insert_before(center, 1);
   if (head == NULL)
     exit(1);
-  display_node(head);
+  dump_node(head);
   puts("");
 
   // node_seek
@@ -32,16 +32,16 @@ int main() {
   puts("");
 
   // node_delete_one(head)
-  node_delete_one(head->next);
-  display_node(head);
+  node_delete_one(center->next);
+  dump_node(head);
   puts("");
 
   // node_delete_one(tail)
   node_delete_one(center->prev);
-  display_node(head);
+  dump_node(center);
   puts("");
 
   // node_delete_all
-  if ((node_delete_after(head)) != true)
+  if ((node_delete_after(center)) != true)
     puts("err");
 }
