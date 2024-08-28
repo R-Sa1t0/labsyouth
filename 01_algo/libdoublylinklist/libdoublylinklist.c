@@ -26,6 +26,8 @@ void dump_node(const Node *node) {
   }
 }
 
+void dump_all(const Node *n) { dump_node(node_seek_c(n, INT64_MIN)); }
+
 Node *node_new(data_t v) {
   Node *new = (Node *)malloc(sizeof(Node));
   if (new == NULL)
@@ -81,6 +83,10 @@ Node *node_seek(Node *n, const int64_t offset) {
     }
   }
   return n;
+}
+
+const Node *node_seek_c(const Node *n, const int64_t offset) {
+  return node_seek((Node *)n, offset);
 }
 
 Node *node_insert(Node *n, data_t v) {

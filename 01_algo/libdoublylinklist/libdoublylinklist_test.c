@@ -8,7 +8,6 @@ int main() {
   // node_new
   // Node* head =
   Node *center = node_new(0);
-  Node *head = center;
   assert(center != NULL);
   if (center == NULL)
     exit(1);
@@ -16,14 +15,13 @@ int main() {
   // node_insert
   if (node_insert(center, 1) == NULL)
     exit(1);
-  dump_node(head);
+  dump_all(center);
   puts("");
 
   // node_insert_before
-  head = node_insert_before(center, 1);
-  if (head == NULL)
+  if (node_insert_before(center, 1) == NULL)
     exit(1);
-  dump_node(head);
+  dump_all(center);
   puts("");
 
   // node_seek
@@ -33,12 +31,12 @@ int main() {
 
   // node_delete_one(head)
   node_delete_one(center->next);
-  dump_node(head);
+  dump_all(center);
   puts("");
 
   // node_delete_one(tail)
   node_delete_one(center->prev);
-  dump_node(center);
+  dump_all(center);
   puts("");
 
   // node_delete_all

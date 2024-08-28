@@ -15,10 +15,13 @@ typedef struct link_node {
 
 // デバッグ用ダンプ出力
 void dump_node(const Node *n);
+// 必要であればdump_all(先頭までたどって表示)を作る
+void dump_all(const Node *n);
 
 // シーク(nを起点とし、offset: +で末尾方向, -で先頭方向, INT64_MAXで末尾,
 // INT64_MINで先頭)
 Node *node_seek(Node *n, int64_t offset);
+const Node *node_seek_c(const Node *n, const int64_t offset);
 
 // 初期ノードの作成
 Node *node_new(data_t v);
