@@ -15,13 +15,13 @@ int main() {
   // node_insert
   if (node_insert(center, 1) == NULL)
     exit(1);
-  dump_all(center);
+  node_dump_all(center);
   puts("");
 
   // node_insert_before
   if (node_insert_before(center, 1) == NULL)
     exit(1);
-  dump_all(center);
+  node_dump_all(center);
   puts("");
 
   // node_seek
@@ -31,15 +31,13 @@ int main() {
 
   // node_delete_one(head)
   node_delete_one(center->next);
-  dump_all(center);
+  node_dump_all(center);
   puts("");
 
   // node_delete_one(tail)
   node_delete_one(center->prev);
-  dump_all(center);
+  node_dump_all(center);
   puts("");
 
-  // node_delete_all
-  if ((node_delete_after(center)) != true)
-    puts("err");
+  node_delete_after(center);
 }

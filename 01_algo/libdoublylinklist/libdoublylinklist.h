@@ -14,9 +14,10 @@ typedef struct link_node {
 } Node;
 
 // デバッグ用ダンプ出力
-void dump_node(const Node *n);
+// Todo: node_dump_all & node_dump()にする
+void node_dump(const Node *n);
 // 必要であればdump_all(先頭までたどって表示)を作る
-void dump_all(const Node *n);
+void node_dump_all(const Node *n);
 
 // シーク(nを起点とし、offset: +で末尾方向, -で先頭方向, INT64_MAXで末尾,
 // INT64_MINで先頭)
@@ -33,5 +34,5 @@ Node *node_insert_before(Node *n, data_t v);
 // ノードを1つ削除
 void node_delete_one(Node *n);
 // ノードの削除 (指定したポインタから先を削除)
-bool node_delete_after(Node *n);
+void node_delete_after(Node *n);
 // node_delete_before()は必要になったら実装する

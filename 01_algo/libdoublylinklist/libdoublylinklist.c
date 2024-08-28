@@ -5,7 +5,7 @@
 
 #include "libdoublylinklist.h"
 
-void dump_node(const Node *node) {
+void node_dump(const Node *node) {
   if (node == NULL) {
     puts("");
     return;
@@ -26,7 +26,7 @@ void dump_node(const Node *node) {
   }
 }
 
-void dump_all(const Node *n) { dump_node(node_seek_c(n, INT64_MIN)); }
+void node_dump_all(const Node *n) { node_dump(node_seek_c(n, INT64_MIN)); }
 
 Node *node_new(data_t v) {
   Node *new = (Node *)malloc(sizeof(Node));
@@ -49,37 +49,41 @@ void node_delete_one(Node *n) {
   free(n);
 }
 
-bool node_delete_after(Node *n) {
+void node_delete_after(Node *n) {
   if (n == NULL)
-    return false;
+    return;
 
   while (n) {
     Node *tmp = n;
     n = n->next;
     node_delete_one(tmp);
   }
-
-  return true;
 }
 
 Node *node_seek(Node *n, const int64_t offset) {
   if (n == NULL)
     return NULL;
 
-  if (offset == INT64_MAX)
-    while (n->next)
+  if (offset == INT64_MAX) {
+    while (n->next) {
       n = n->next;
-  else if (offset == INT64_MIN)
-    while (n->prev)
+    }
+    return n;
+  }
+  if (offset == INT64_MIN) {
+    while (n->prev) {
       n = n->prev;
-  else {
-    for (int64_t i = 0; i < llabs(offset); i++) {
-      if (n == NULL)
-        return NULL;
-      else if (offset > 0)
-        n = n->next;
-      else
-        n = n->prev;
+    }
+    return n;
+  }
+
+  for (int64_t i = 0; i < llabs(offset); i++) {
+    if (n == NULL)
+      return NULL;
+    if (offset > 0) {
+      n = n->next;
+    } else {
+      n = n->prev;
     }
   }
   return n;
