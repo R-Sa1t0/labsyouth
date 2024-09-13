@@ -2,12 +2,10 @@
 #include <stdio.h>
 #include <thread>
 
-constexpr int C = 10000000;
+const int C = 10000000;
 
-// std::atomic<int> g_x = 0;
-// std::atomic<int> g_y = C * 2;
-std::atomic<int> g_x{0};
-std::atomic<int> g_y{C * 2};
+std::atomic<int> g_x = 0;
+std::atomic<int> g_y = C * 2;
 
 void test(int x) {
   printf("  test x=%d\n", x);
