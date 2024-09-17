@@ -1,6 +1,6 @@
 CXX = clang++-18
 MAIN = main.cpp
-CFLAGS = -Wall -Wextra -O2
+CFLAGS = -g -Wall -Wextra
 DEBUGFLAGS_1 = -g -Wall -Wextra -fsanitize=memory
 DEBUGFLAGS_2 = -g -Wall -Wextra -fsanitize=address
 

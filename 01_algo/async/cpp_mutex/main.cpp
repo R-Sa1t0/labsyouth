@@ -38,7 +38,7 @@ int main() {
     g_x++;
     g_y--;
     sum = g_x + g_y;
-    g_mtx.unlock();
+    // g_mtx.unlock();
 
     if (i == C / 2)
       printf("main1 sum=%d\n", sum);
