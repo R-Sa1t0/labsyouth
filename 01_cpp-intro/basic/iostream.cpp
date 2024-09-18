@@ -8,6 +8,7 @@ int main()
 
   std::printf("Hello!");
   std::printf("Hello!");
+  i
   // commnent
   /*
     multi-line comment
