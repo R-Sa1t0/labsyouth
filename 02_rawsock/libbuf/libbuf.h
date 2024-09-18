@@ -15,3 +15,4 @@ typedef struct buf_node {
 } Buf;
 
 bool print_buf(Buf *b);
+Buf *buf_init();

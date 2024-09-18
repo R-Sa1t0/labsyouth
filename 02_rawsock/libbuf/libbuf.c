@@ -9,7 +9,7 @@
 bool print_buf(Buf *b) {
   if (b == NULL)
     return false;
-  fprintf(stdout, "len: %u, ", b->len);
+  fprintf(stdout, "len: %zu, ", b->len);
   fprintf(stdout, "next: %p, ", b->next);
   for (int i = 0; i < BUF_SIZE; i++)
     fprintf(stdout, "%02x ", b->v[i]);
