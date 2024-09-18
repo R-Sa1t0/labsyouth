@@ -1,3 +1,4 @@
+#include <condition_variable>
 #include <mutex>
 #include <queue>
 #include <stdbool.h>
@@ -7,12 +8,16 @@
 
 std::mutex g_mtx;
 std::queue<uint16_t> q;
+std::condition_variable cv;
 
 void producer() {
   puts("producer thread start.");
-  for (uint16_t i = 0; i < 900; i++) {
-    std::lock_guard<std::mutex> lock(g_mtx);
-    q.push(i);
+  for (uint16_t i = 0; i < 77; i++) {
+    {
+      std::unique_lock<std::mutex> lock(g_mtx);
+      q.push(i);
+    }
+    cv.notify_one();
   }
   puts("producer thread end.");
   return;
@@ -21,7 +26,8 @@ void producer() {
 void consumer() {
   puts("consumer thread start.");
   while (true) {
-    std::lock_guard<std::mutex> lock(g_mtx);
+    std::unique_lock<std::mutex> lock(g_mtx);
+    cv.wait(lock, [] { return !q.empty(); });
     if (!q.empty()) {
       uint16_t tmp = q.front();
       q.pop();
