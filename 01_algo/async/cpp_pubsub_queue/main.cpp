@@ -22,7 +22,7 @@ void consumer() {
   puts("consumer thread start.");
   while (true) {
     std::lock_guard<std::mutex> lock(g_mtx);
-    if (q.empty() != true) {
+    if (!q.empty()) {
       uint16_t tmp = q.front();
       q.pop();
       printf("%d\n", tmp);
