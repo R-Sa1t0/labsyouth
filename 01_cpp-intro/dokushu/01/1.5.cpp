@@ -28,7 +28,7 @@ struct ex {
   double h = 8.9;
   char i = '0';
   char j[3] = "11";
-  char k[8] = R"hello(12)hello"; // 生文字列リテラル
+  char k[100] = R"hello(12)hello"; // 生文字列リテラル
 
   unsigned int l = 0xab; //16進数
   unsigned int m = 01; // 8進数
@@ -64,4 +64,6 @@ struct cast {
 
 int main()
 {
+  char j[] = "aa11";
+
 }

@@ -58,11 +58,14 @@ main()
 
   int b = -3;
 //  int b = 3;
+  // 条件演算子
   std::printf("%d\n", b < 0 ? -b : b);
 
 
-
   label:
+//  {
     std::puts("aaa");
+    int x = 100;
+//  }
   if (false) goto label;
 }
