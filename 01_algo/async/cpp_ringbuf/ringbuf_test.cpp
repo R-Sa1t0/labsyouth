@@ -1,3 +1,4 @@
+#include <chrono>
 #include <condition_variable>
 #include <deque>
 #include <iostream>
@@ -6,22 +7,34 @@
 
 #include "ringbuf.hpp"
 
-ringbuf rbuf(5);
+ringbuf rbuf(100000);
+
+bool finished = false;
+std::chrono::time_point<std::chrono::high_resolution_clock> start;
 
 void producer() {
   puts("producer thread start.");
+  start = std::chrono::high_resolution_clock::now();
 
-  for (int i = 0; i < 44; i++)
+  for (int i = 0; i < 1000000; i++)
     rbuf.push(i);
 
+  finished = true;
   puts("producer thread end.");
 }
 void consumer() {
   puts("consumer thread start.");
 
   while (true) {
-    int v = rbuf.pop();
-    std::printf("%d\n", v);
+    rbuf.pop();
+
+    if (finished == true) {
+      auto end = std::chrono::high_resolution_clock::now();
+      auto duration =
+          std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+      std::cout << "time: " << duration.count() << std::endl;
+      return;
+    }
   }
 }
 

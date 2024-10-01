@@ -5,6 +5,8 @@ DEBUGFLAGS_1 = -g -Wall -Wextra -fsanitize=memory
 DEBUGFLAGS_2 = -g -Wall -Wextra -fsanitize=address
 
 all: format build exec
+test: override MAIN = ringbuf_test.cpp
+test: format build exec
 
 debug: clean format sanitize build vexec
 
