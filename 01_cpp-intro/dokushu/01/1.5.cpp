@@ -55,6 +55,10 @@ struct ptr_const{
 struct null_ptr {
   int* i = 0; // ←実は0=nullptr わかりにくい
   int* j = nullptr;
+  /*
+    int *a = nullptr;
+    *a = 42; // → segvする
+  */
 };
 
 struct cast {
@@ -65,5 +69,4 @@ struct cast {
 int main()
 {
   char j[] = "aa11";
-
 }
