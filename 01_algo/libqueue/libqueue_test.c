@@ -25,6 +25,5 @@ int main(void) {
     display_cells(q->head);
   }
 
-  if ((queue_del(q)) != true)
-    exit(1);
+  queue_del(q);
 }

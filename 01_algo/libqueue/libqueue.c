@@ -1,9 +1,9 @@
 #include "libqueue.h"
 #include "../liblinklist/liblinklist.h"
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
 
 Queue *queue_init() {
   Queue *q = (Queue *)malloc(sizeof(Queue));
@@ -13,19 +13,12 @@ Queue *queue_init() {
   return q;
 }
 
-bool queue_del(Queue *q) {
-  while (true) {
-    if (q->head == NULL) {
-      q->head = NULL;
-      break;
-    }
-    q->head = cell_delete(q->head);
-  }
+void queue_del(Queue *q) {
+  if (q == NULL)
+    return;
 
+  cell_alldelete(q->head);
   free(q);
-  q = NULL;
-
-  return true;
 }
 
 bool push(Queue *q, data_t v) {
@@ -44,20 +37,16 @@ bool push(Queue *q, data_t v) {
     q->tail = new;
   }
 
-
   return true;
 }
 
 bool pop(Queue *q, data_t *v) {
-  if (q->head == NULL || q->tail == NULL)
+  if (q == NULL || q->head == NULL || q->tail == NULL)
     return false;
 
   *v = q->head->data;
 
-  q->head = cell_delete(q->head);
-  if (q->head == NULL) {
-    q->tail = NULL;
-  }
+  cell_delete_and_seek_next(&q->head);
 
   return true;
 }

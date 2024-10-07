@@ -23,7 +23,5 @@ int main(void) {
       break;
     printf("v: %u\n", v);
   }
-
-  if ((stack_delete(s)) != true)
-    exit(1);
+  stack_delete(s);
 }
