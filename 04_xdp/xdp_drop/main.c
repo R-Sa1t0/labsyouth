@@ -2,9 +2,9 @@
 #include <bpf/bpf_helpers.h>
 
 SEC("main")
-int xdp_prog_simple(struct xdp_md *ctx)
+int xdp_main(struct xdp_md *ctx)
 {
-	return XDP_PASS;
+	return XDP_DROP;
 }
 
 char _license[] SEC("license") = "BSD";

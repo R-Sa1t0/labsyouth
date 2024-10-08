@@ -13,11 +13,11 @@ build:
 	$(CC) $(CFLAGS) $(MAIN) $(LIBS)
 
 sanitize: 
-	$(CC) $(DEBUGFLAGS_1) $(MAIN) $(LIBS)
-	$(CC) $(DEBUGFLAGS_2) $(MAIN) $(LIBS)
+	$(CC) $(DEBUGFLAGS_1) -c $(MAIN) $(LIBS)
+	$(CC) $(DEBUGFLAGS_2) -c $(MAIN) $(LIBS)
 
 attach:
 	sudo ip -n N2 link set dev N2-N1 xdp obj main.o sec main
 
-dettach:
+detach:
 	sudo ip -n N2 link set dev N2-N1 xdp off
