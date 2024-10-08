@@ -7,10 +7,9 @@
 
 #include "ringbuf.hpp"
 
-const int N = 100000;
+const int N = 10000000;
 
-ringbuf rbuf(100000);
-
+ringbuf rbuf(999);
 
 void producer() {
   puts("producer thread start.");
@@ -32,7 +31,8 @@ void consumer() {
   }
 
   auto end = std::chrono::high_resolution_clock::now();
-  auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+  auto duration =
+      std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
   std::cout << "time: " << duration.count() << std::endl;
 }
 

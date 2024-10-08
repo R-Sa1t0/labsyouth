@@ -1,5 +1,6 @@
 CXX = clang++-18
-MAIN = ringbuf.cpp
+MAIN = ringbuf_test.cpp
+LIBS = ringbuf.cpp ringbuf.hpp
 CFLAGS = -g -Wall -Wextra
 DEBUGFLAGS_1 = -g -Wall -Wextra -fsanitize=memory
 DEBUGFLAGS_2 = -g -Wall -Wextra -fsanitize=address
@@ -18,11 +19,11 @@ format:
 	done
 
 build:
-	$(CXX) $(CFLAGS) $(MAIN)
+	$(CXX) $(CFLAGS) $(MAIN) $(LIBS)
 
 sanitize: 
-	$(CXX) $(DEBUGFLAGS_1) $(MAIN)
-	$(CXX) $(DEBUGFLAGS_2) $(MAIN)
+	$(CXX) $(DEBUGFLAGS_1) $(MAIN) $(LIBS)
+	$(CXX) $(DEBUGFLAGS_2) $(MAIN) $(LIBS)
 
 vexec:
 	valgrind --leak-check=full ./a.out
