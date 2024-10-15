@@ -1,0 +1,2 @@
+// アタッチしているもの一覧
+sudo bpftool prog
