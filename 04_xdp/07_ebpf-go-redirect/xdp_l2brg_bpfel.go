@@ -60,7 +60,6 @@ type xdp_l2brgProgramSpecs struct {
 //
 // It can be passed ebpf.CollectionSpec.Assign.
 type xdp_l2brgMapSpecs struct {
-	Devmap *ebpf.MapSpec `ebpf:"devmap"`
 }
 
 // xdp_l2brgObjects contains all objects after they have been loaded into the kernel.
@@ -82,13 +81,10 @@ func (o *xdp_l2brgObjects) Close() error {
 //
 // It can be passed to loadXdp_l2brgObjects or ebpf.CollectionSpec.LoadAndAssign.
 type xdp_l2brgMaps struct {
-	Devmap *ebpf.Map `ebpf:"devmap"`
 }
 
 func (m *xdp_l2brgMaps) Close() error {
-	return _Xdp_l2brgClose(
-		m.Devmap,
-	)
+	return _Xdp_l2brgClose()
 }
 
 // xdp_l2brgPrograms contains all programs after they have been loaded into the kernel.
