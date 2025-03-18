@@ -6,6 +6,8 @@ env-up:
 	sudo ip link add C1-N1 netns C1 type veth peer N1-C1 netns N1
 	sudo ip link add N1-N2 netns N1 type veth peer N2-N1 netns N2
 	sudo ip link add N2-C2 netns N2 type veth peer C2-N2 netns C2
+	sudo ip -n N1 link set lo up
+	sudo ip -n N2 link set lo up
 	sudo ip -n C1 link set C1-N1 up
 	sudo ip -n C2 link set C2-N2 up
 	sudo ip -n C1 addr add 192.168.0.1/24 dev C1-N1

@@ -1,4 +1,4 @@
-inimumLimaVersion: "1.0.0"
+minimumLimaVersion: "1.0.0"
 images:
 - location: "https://ftp.udx.icscoe.jp/Linux/ubuntu-cloud-images/releases/24.04/release/ubuntu-24.04-server-cloudimg-arm64.img"
   arch: "aarch64"
@@ -17,6 +17,7 @@ provision:
      DEBIAN_FRONTEND=noninteractive apt-get install -y termshark
 
 mounts:
-- location: "~"
+- location: "~/dev/"
+  writable: true
 - location: "/tmp/lima"
   writable: true
