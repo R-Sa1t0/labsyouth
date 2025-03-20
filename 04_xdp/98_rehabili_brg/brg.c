@@ -9,13 +9,13 @@ struct {
 	__uint(key_size, sizeof(__u32));
 	__uint(value_size, sizeof(__u32));
 	__uint(max_entries, 256);
-} tx_port SEC(".maps");
+} brg_port SEC(".maps");
 
 #define IF_ETH0 0
 #define IF_ETH1 1
 
 SEC("xdp")
-int xdp_bridge_func(struct xdp_md *ctx)
+int xdp_brg(struct xdp_md *ctx)
 {
 	void *data_end = (void *)(long)ctx->data_end;
 	void *data = (void *)(long)ctx->data;
@@ -27,14 +27,14 @@ int xdp_bridge_func(struct xdp_md *ctx)
 	}
 
 	int eth0_ifi = IF_ETH0;
-	__u32 *ingress_ifindex = bpf_map_lookup_elem(&tx_port, &eth0_ifi);
+	__u32 *ingress_ifindex = bpf_map_lookup_elem(&brg_port, &eth0_ifi);
 	if (ingress_ifindex && ctx->ingress_ifindex == *ingress_ifindex) {
 		ifindex = IF_ETH1;
 	} else {
 		ifindex = IF_ETH0;
 	}
 
-	return bpf_redirect_map(&tx_port, ifindex, 0);
+	return bpf_redirect_map(&brg_port, ifindex, 0);
 }
 
 char LICENSE[] SEC("license") = "Dual BSD/GPL";

@@ -1,4 +1,4 @@
-all: brg.o
+all: detach clean brg.o attach
 
 env-up:
 	sudo ip netns add C1
@@ -23,23 +23,20 @@ env-down:
 
 
 
-KERNEL_HEADERS := /usr/include
-xdp_bridge.o:  brg.c
-	clang -S \
-	    -target bpf \
-	    -D __BPF_TRACING__ \
-	    -I$(KERNEL_HEADERS) \
-	    -Wall \
-	    -Wno-unused-value \
-	    -Wno-pointer-sign \
-	    -Wno-compare-distinct-pointer-types \
-	    -Werror \
-	    -O2 -emit-llvm -c -g $< -o ${@:.o=.ll}
-	llc -march=bpf -filetype=obj -o $@ ${@:.o=.ll}
+brg.o:  brg.c
+	clang -O2 -g -target bpf -c brg.c -o brg.o
 
 clean:
 	rm -f *.o *.ll
 
 attach:
 	sudo bpftool prog load ./brg.o /sys/fs/bpf/xdp_brg type xdp
+	sudo bpftool map update pinned /sys/fs/bpf/brg_ports key hex 00 00 00 00 value hex 00 00 00 02
+	sudo bpftool map update pinned /sys/fs/bpf/brg_ports key hex 01 00 00 00 value hex 00 00 00 03
 
+detach:
+	sudo rm -f /sys/fs/bpf/xdp_brg
+	sudo rm -f /sys/fs/bpf/brg_ports
+
+check:
+	sudo bpftool prog list	
