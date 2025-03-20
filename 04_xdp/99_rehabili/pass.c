@@ -4,7 +4,7 @@
 #include <bpf/bpf_helpers.h>
 
 SEC("xdp")
-int xdp_main(struct xdp_md *ctx)
+int xdp_pass(struct xdp_md *ctx)
 {
         return XDP_PASS;
 }

@@ -25,7 +25,7 @@ func main() {
 	}
 
 	link, err := link.AttachXDP(link.XDPOptions{
-		Program:   objs.XdpMain,
+		Program:   objs.XdpPass,
 		Interface: iface.Index,
 	})
 	if err != nil {

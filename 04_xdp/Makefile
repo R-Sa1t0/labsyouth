@@ -44,3 +44,6 @@ format:
 
 watch:
 	sudo cat /sys/kernel/debug/tracing/trace_pipe
+
+check:
+	sudo bpftool prog

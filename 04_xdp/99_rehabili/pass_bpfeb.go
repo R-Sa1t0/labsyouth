@@ -47,13 +47,14 @@ func loadPassObjects(obj interface{}, opts *ebpf.CollectionOptions) error {
 type passSpecs struct {
 	passProgramSpecs
 	passMapSpecs
+	passVariableSpecs
 }
 
-// passSpecs contains programs before they are loaded into the kernel.
+// passProgramSpecs contains programs before they are loaded into the kernel.
 //
 // It can be passed ebpf.CollectionSpec.Assign.
 type passProgramSpecs struct {
-	XdpMain *ebpf.ProgramSpec `ebpf:"xdp_main"`
+	XdpPass *ebpf.ProgramSpec `ebpf:"xdp_pass"`
 }
 
 // passMapSpecs contains maps before they are loaded into the kernel.
@@ -62,12 +63,19 @@ type passProgramSpecs struct {
 type passMapSpecs struct {
 }
 
+// passVariableSpecs contains global variables before they are loaded into the kernel.
+//
+// It can be passed ebpf.CollectionSpec.Assign.
+type passVariableSpecs struct {
+}
+
 // passObjects contains all objects after they have been loaded into the kernel.
 //
 // It can be passed to loadPassObjects or ebpf.CollectionSpec.LoadAndAssign.
 type passObjects struct {
 	passPrograms
 	passMaps
+	passVariables
 }
 
 func (o *passObjects) Close() error {
@@ -87,16 +95,22 @@ func (m *passMaps) Close() error {
 	return _PassClose()
 }
 
+// passVariables contains all global variables after they have been loaded into the kernel.
+//
+// It can be passed to loadPassObjects or ebpf.CollectionSpec.LoadAndAssign.
+type passVariables struct {
+}
+
 // passPrograms contains all programs after they have been loaded into the kernel.
 //
 // It can be passed to loadPassObjects or ebpf.CollectionSpec.LoadAndAssign.
 type passPrograms struct {
-	XdpMain *ebpf.Program `ebpf:"xdp_main"`
+	XdpPass *ebpf.Program `ebpf:"xdp_pass"`
 }
 
 func (p *passPrograms) Close() error {
 	return _PassClose(
-		p.XdpMain,
+		p.XdpPass,
 	)
 }
 
