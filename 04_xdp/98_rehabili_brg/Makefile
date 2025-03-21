@@ -21,8 +21,6 @@ env-down:
 	sudo ip netns del C2
 	sudo ip netns del N1
 
-
-
 brg.o:  brg.c
 	clang -O2 -g -target bpf -c brg.c -o brg.o
 
@@ -30,13 +28,17 @@ clean:
 	rm -f *.o *.ll
 
 attach:
-	sudo bpftool prog load ./brg.o /sys/fs/bpf/xdp_brg type xdp
-	sudo bpftool map update pinned /sys/fs/bpf/brg_ports key hex 00 00 00 00 value hex 00 00 00 02
-	sudo bpftool map update pinned /sys/fs/bpf/brg_ports key hex 01 00 00 00 value hex 00 00 00 03
+	sudo bpftool prog load ./brg.o /sys/fs/bpf/xdp_brg type xdp pinmaps /sys/fs/bpf
+	sudo bpftool map push pinned /sys/fs/bpf/brg_port key hex 00 00 00 00 value hex 02 00 00 00
+	sudo bpftool map push pinned /sys/fs/bpf/brg_port key hex 01 00 00 00 value hex 03 00 00 00
+	sudo bpftool net attach xdp pinned /sys/fs/bpf/xdp_brg dev N1-C1
+	sudo bpftool net attach xdp pinned /sys/fs/bpf/xdp_brg dev N1-C2
+
 
 detach:
 	sudo rm -f /sys/fs/bpf/xdp_brg
-	sudo rm -f /sys/fs/bpf/brg_ports
+	sudo rm -f /sys/fs/bpf/brg_port
 
 check:
+	sudo ls -lah /sys/fs/bpf
 	sudo bpftool prog list	
