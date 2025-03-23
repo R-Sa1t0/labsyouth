@@ -33,16 +33,18 @@ attach:
 	#sudo bpftool map push pinned /sys/fs/bpf/brg_port key hex 01 00 00 00 value hex 03 00 00 00
 	#sudo ip netns exec N1 bpftool net attach xdp pinned /sys/fs/bpf/xdp_brg dev N1-C1
 	#sudo ip netns exec N1 bpftool net attach xdp pinned /sys/fs/bpf/xdp_brg dev N1-C2
-	sudo ip -n N1  link set N1-C1 xdp obj ./brg.o sec xdp	
-	sudo ip -n N1  link set N1-C2 xdp obj ./brg.o sec xdp
-	sudo bpftool map update id 14 key hex 00 00 00 00 value hex 02 00 00 00
+	sudo ip -n N1 link set N1-C1 xdpgeneric obj ./brg.o sec xdp	
+	sudo ip -n N1 link set N1-C2 xdpgeneric obj ./brg.o sec xdp
+	#sudo bpftool map update id 14 key hex 00 00 00 00 value hex 02 00 00 00
 
 detach:
-	sudo ip -n N1  link set N1-C1 xdp off
-	sudo ip -n N1  link set N1-C2 xdp off
+	sudo ip -n N1  link set N1-C1 xdpgeneric off
+	sudo ip -n N1  link set N1-C2 xdpgeneric off
 	#sudo rm -f /sys/fs/bpf/xdp_brg
 	#sudo rm -f /sys/fs/bpf/brg_port
 
 check:
 	sudo ls -lah /sys/fs/bpf
-	sudo bpftool prog list	
+	sudo bpftool prog list
+	sudo cat /sys/kernel/debug/tracing/trace_pipe
+
