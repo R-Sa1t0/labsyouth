@@ -34,6 +34,10 @@ int xdp_brg(struct xdp_md *ctx)
 		ifindex = IF_ETH0;
 	}
 
+	char s1[] = "Hello!!\n";
+	bpf_trace_printk(s1, sizeof(s1));
+	
+	ifindex = 2;
 	return bpf_redirect_map(&brg_port, ifindex, 0);
 }
 

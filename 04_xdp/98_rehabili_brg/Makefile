@@ -28,16 +28,20 @@ clean:
 	rm -f *.o *.ll
 
 attach:
-	sudo bpftool prog load ./brg.o /sys/fs/bpf/xdp_brg type xdp pinmaps /sys/fs/bpf
-	sudo bpftool map push pinned /sys/fs/bpf/brg_port key hex 00 00 00 00 value hex 02 00 00 00
-	sudo bpftool map push pinned /sys/fs/bpf/brg_port key hex 01 00 00 00 value hex 03 00 00 00
-	sudo bpftool net attach xdp pinned /sys/fs/bpf/xdp_brg dev N1-C1
-	sudo bpftool net attach xdp pinned /sys/fs/bpf/xdp_brg dev N1-C2
-
+	#sudo bpftool prog load ./brg.o /sys/fs/bpf/xdp_brg type xdp pinmaps /sys/fs/bpf
+	#sudo bpftool map push pinned /sys/fs/bpf/brg_port key hex 00 00 00 00 value hex 02 00 00 00
+	#sudo bpftool map push pinned /sys/fs/bpf/brg_port key hex 01 00 00 00 value hex 03 00 00 00
+	#sudo ip netns exec N1 bpftool net attach xdp pinned /sys/fs/bpf/xdp_brg dev N1-C1
+	#sudo ip netns exec N1 bpftool net attach xdp pinned /sys/fs/bpf/xdp_brg dev N1-C2
+	sudo ip -n N1  link set N1-C1 xdp obj ./brg.o sec xdp	
+	sudo ip -n N1  link set N1-C2 xdp obj ./brg.o sec xdp
+	sudo bpftool map update id 14 key hex 00 00 00 00 value hex 02 00 00 00
 
 detach:
-	sudo rm -f /sys/fs/bpf/xdp_brg
-	sudo rm -f /sys/fs/bpf/brg_port
+	sudo ip -n N1  link set N1-C1 xdp off
+	sudo ip -n N1  link set N1-C2 xdp off
+	#sudo rm -f /sys/fs/bpf/xdp_brg
+	#sudo rm -f /sys/fs/bpf/brg_port
 
 check:
 	sudo ls -lah /sys/fs/bpf
