@@ -9,17 +9,18 @@ env-up:
 	sudo ip -n C2 link set lo up
 	sudo ip -n N1 link set lo up
 	sudo ip -n N2 link set lo up
-	sudo ip link add C1-N1 netns C1 type veth peer N1-C1 netns N1
-	sudo ip link add N2-N1 netns N2 type veth peer N1-N2 netns N1
-	sudo ip link add C2-N2 netns C2 type veth peer N2-C2 netns N2
+	sudo ip link add C1-N1 netns C1 mtu 1426 type veth \
+		peer N1-C1 netns N1 mtu 1426
+	sudo ip link add N2-N1 netns N2 addr 66:aa:4b:a6:d6:ba type veth \
+		peer N1-N2 netns N1 addr 12:a6:e0:4b:94:4a
+	sudo ip link add C2-N2 netns C2 mtu 1426 type veth \
+		peer N2-C2 netns N2 mtu 1426
 	sudo ip -n C1 link set C1-N1 up
 	sudo ip -n N1 link set N1-C1 up
 	sudo ip -n N1 link set N1-N2 up
 	sudo ip -n N2 link set N2-N1 up
 	sudo ip -n N2 link set N2-C2 up
 	sudo ip -n C2 link set C2-N2 up
-	sudo ip -n N1 link set N1-N2 addr 12:a6:e0:4b:94:4a
-	sudo ip -n N2 link set N2-N1 addr 66:aa:4b:a6:d6:ba
 	sudo ip -n C1 addr add dev C1-N1 10.0.0.1/24
 	sudo ip -n C2 addr add dev C2-N2 10.0.0.2/24
 	sudo ip -n N1 -6 addr add fc00::1/64 dev N1-N2
@@ -27,8 +28,7 @@ env-up:
 	sudo ip -n N1 -6 route add fd00:2::/64 via fc00::2
 	sudo ip -n N2 -6 route add fd00:1::/64 via fc00::1
 	sudo ip -n N1 -6 route add fd00:1::1/128 encap seg6local action End.DX2 oif N1-C1 dev N1-C1
-	sudo ip -n N2 -6 route add fd00:2::1/128 encap seg6local action End.DX2 oif N2-C2 dev N2-C2
-
+	sudo ip -n N2 -6 route add fd00:2::1/128 encap seg6local action End.DX2 oif N2-C2 dev N2-C2	
 
 env-down:
 	sudo ip netns del C1
