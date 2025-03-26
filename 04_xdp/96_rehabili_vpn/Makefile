@@ -26,6 +26,9 @@ env-up:
 	sudo ip -n N2 -6 addr add fc00::2/64 dev N2-N1
 	sudo ip -n N1 -6 route add fd00:2::/64 via fc00::2
 	sudo ip -n N2 -6 route add fd00:1::/64 via fc00::1
+	sudo ip -n N1 -6 route add fd00:1::1/128 encap seg6local action End.DX2 oif N1-C1 dev N1-C1
+	sudo ip -n N2 -6 route add fd00:2::1/128 encap seg6local action End.DX2 oif N2-C2 dev N2-C2
+
 
 env-down:
 	sudo ip netns del C1
@@ -49,10 +52,20 @@ attach:
 	sudo ip netns exec N1 bpftool net attach xdpgeneric id \
 		$$(sudo bpftool prog show pinned /sys/fs/bpf/vpn_n1 | grep -o '^[0-9]\+') dev N1-N2
 	sudo bpftool prog load ./vpn.o /sys/fs/bpf/vpn_n2 type xdp pinmaps /sys/fs/bpf/vpn_n2_cfg	
+	sudo ./set_map.py --map /sys/fs/bpf/vpn_n2_cfg/vpn_cfg_map --ifidx-wan 2 --ifidx-lan 3 \
+		--dmac 12:a6:e0:4b:94:4a --smac 66:aa:4b:a6:d6:ba \
+		--saddr fc00::2 --daddr fd00:1::1 --sid fd00:1::1
+	sudo ip netns exec N2 bpftool net attach xdpgeneric id \
+		$$(sudo bpftool prog show pinned /sys/fs/bpf/vpn_n2 | grep -o '^[0-9]\+') dev N2-N1
+	sudo ip netns exec N2 bpftool net attach xdpgeneric id \
+		$$(sudo bpftool prog show pinned /sys/fs/bpf/vpn_n2 | grep -o '^[0-9]\+') dev N2-C2
+	
 
 detach:
 	sudo ip -n N1 link set N1-C1 xdpgeneric off
 	sudo ip -n N1 link set N1-N2 xdpgeneric off
+	sudo ip -n N2 link set N2-N1 xdpgeneric off
+	sudo ip -n N2 link set N2-C2 xdpgeneric off
 	sudo rm -rf /sys/fs/bpf/vpn_n1 /sys/fs/bpf/vpn_n1_cfg
 	sudo rm -rf /sys/fs/bpf/vpn_n2 /sys/fs/bpf/vpn_n2_cfg
 
