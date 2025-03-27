@@ -1,0 +1,9 @@
+go 1.23.2
+
+use (
+	./04_ebpf-go-handson
+	./05_ebpf-go-loader
+	./06_ebpf-go-map
+	./07_ebpf-go-devmap
+	./08_etherip
+)

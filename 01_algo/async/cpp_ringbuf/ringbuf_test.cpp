@@ -7,35 +7,33 @@
 
 #include "ringbuf.hpp"
 
-ringbuf rbuf(100000);
+const int N = 10000000;
 
-bool finished = false;
-std::chrono::time_point<std::chrono::high_resolution_clock> start;
+ringbuf rbuf(999);
 
 void producer() {
   puts("producer thread start.");
-  start = std::chrono::high_resolution_clock::now();
 
-  for (int i = 0; i < 1000000; i++)
+  for (int i = 0; i < N; i++) {
     rbuf.push(i);
+  }
 
-  finished = true;
   puts("producer thread end.");
 }
 void consumer() {
   puts("consumer thread start.");
 
-  while (true) {
-    rbuf.pop();
+  std::chrono::time_point<std::chrono::high_resolution_clock> start;
+  start = std::chrono::high_resolution_clock::now();
 
-    if (finished == true) {
-      auto end = std::chrono::high_resolution_clock::now();
-      auto duration =
-          std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-      std::cout << "time: " << duration.count() << std::endl;
-      return;
-    }
+  for (int i = 0; i < N; i++) {
+    rbuf.pop();
   }
+
+  auto end = std::chrono::high_resolution_clock::now();
+  auto duration =
+      std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+  std::cout << "time: " << duration.count() << std::endl;
 }
 
 int main() {

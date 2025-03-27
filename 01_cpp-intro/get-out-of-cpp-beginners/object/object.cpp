@@ -88,4 +88,5 @@ int main() {
     // b0 および b1 は dangling pointer になる
   }
 */
+
 }
