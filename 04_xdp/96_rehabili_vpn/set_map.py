@@ -41,5 +41,3 @@ if __name__ == "__main__":
 
     subprocess.run(cmd, shell=True, check=True)
 
-
-

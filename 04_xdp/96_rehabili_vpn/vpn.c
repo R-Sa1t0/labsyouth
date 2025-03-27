@@ -21,7 +21,6 @@ struct {
 	__type(value, struct cfg);
 } vpn_cfg_map SEC(".maps");
 
-
 struct cfg {
 	u32 ifidx_wan;
 	u32 ifidx_lan;
@@ -99,8 +98,9 @@ static inline int encap(struct xdp_md *ctx, struct cfg *vcfg)
 	int ifindex = ctx->ingress_ifindex;
 	char msg[] = "ifidx: %d";
 	bpf_trace_printk(msg, sizeof msg, ifindex);
-
-	return 0;
+	
+	bpf_redirect(vcfg->ifidx_wan, 0);
+	return XDP_REDIRECT;
 }
 
 SEC("xdp")
@@ -113,9 +113,7 @@ int xdp_vpn(struct xdp_md *ctx)
 	
 	__u32 ifidx = ctx->ingress_ifindex;	
 	if (ifidx == vcfg->ifidx_lan) {
-		if (encap(ctx, vcfg)) return XDP_ABORTED;
-		bpf_redirect(vcfg->ifidx_wan, 0);
-		return XDP_REDIRECT;
+		return encap(ctx, vcfg);
 	}
 	return XDP_PASS;	
 }
