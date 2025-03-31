@@ -17,7 +17,7 @@ typedef uint32_t u32;
 struct {
 	__uint(type, BPF_MAP_TYPE_HASH);
 	__uint(max_entries, 1);
-	__type(key, __u8);
+	__type(key, u8);
 	__type(value, struct cfg);
 } encap_cfg_map SEC(".maps");
 
@@ -33,8 +33,8 @@ struct cfg {
 
 static inline int encap(struct xdp_md *ctx, struct cfg *vcfg)
 {
-	u8 *data_end = (const u8 *)(long)ctx->data_end;
-	u8 *data = (const u8 *)(long)ctx->data;
+	u8 *data_end = (u8 *)(long)ctx->data_end;
+	u8 *data = (u8 *)(long)ctx->data;
 	const u16 plen = ((data_end-data) > 1500 ? 1500 : (data_end-data));
 
 
@@ -79,15 +79,14 @@ static inline int encap(struct xdp_md *ctx, struct cfg *vcfg)
 		return XDP_ABORTED; 
 	}
 
-	data_end = (const u8 *)(long)ctx->data_end;
-	data = (const u8 *)(long)ctx->data;
+	data_end = (u8 *)(long)ctx->data_end;
+	data = (u8 *)(long)ctx->data;
 	if ( data + (int)sizeof(struct ethhdr)
 		+ (int)sizeof(struct ipv6hdr)
 		+ (int)sizeof(srh_alloc)
 		> data_end){
 		return XDP_ABORTED;
 	}
-
 	u8 *hdr_p = data;
 	__builtin_memcpy(hdr_p, &ethh, sizeof(ethh));
 	hdr_p += sizeof(ethh);
@@ -107,9 +106,9 @@ SEC("xdp")
 int seg6_l2encap(struct xdp_md *ctx)
 {
 	u8 key = 0;
-	struct cfg *vcfg = bpf_map_lookup_elem(&encap_cfg_map, &key);
+	struct cfg *vcfg = (struct cfg*)bpf_map_lookup_elem(&encap_cfg_map, &key);
 	if (!vcfg) return XDP_ABORTED;
-	
+
 	__u32 ifidx = ctx->ingress_ifindex;	
 	if (ifidx == vcfg->ifidx_lan) {
 		return encap(ctx, vcfg);
