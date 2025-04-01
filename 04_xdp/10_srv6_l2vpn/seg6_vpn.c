@@ -32,6 +32,10 @@ struct cfg {
 	u8 d_sid[16];
 };
 
+static inline void dbg_printpkt(struct xdp_md *ctx) {
+	bpf_printk("ingress_ifidx: %lu\n", ctx->ingress_ifindex);
+}
+
 static inline int encap(struct xdp_md *ctx, struct cfg *vcfg)
 {
 	return XDP_PASS;
@@ -50,6 +54,7 @@ int seg6_l2vpn(struct xdp_md *ctx)
 	char cfg_load_err[] = "configuration loading failure\n";
 	if (!vcfg) {
 		bpf_trace_printk(cfg_load_err, sizeof cfg_load_err);
+		dbg_printpkt(ctx);
 		return XDP_PASS;
 	}
 

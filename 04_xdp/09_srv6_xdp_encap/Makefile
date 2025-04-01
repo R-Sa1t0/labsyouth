@@ -1,5 +1,5 @@
-all: env-down env-up env-test detach clean encap.o attach test
-build-test: clean encap.o
+all: env-down env-up detach clean encap.o attach test
+build: clean encap.o
 
 env-up:
 	sudo ip netns add C1

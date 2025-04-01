@@ -6,7 +6,7 @@
 SEC("xdp")
 int xdp_pass(struct xdp_md *ctx)
 {
-        return XDP_PASS;
+	return XDP_PASS;
 }
 
 char LICENSE[] SEC("license") = "Dual BSD/GPL";

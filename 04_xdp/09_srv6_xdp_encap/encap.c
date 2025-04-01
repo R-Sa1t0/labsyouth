@@ -38,7 +38,7 @@ static inline int encap(struct xdp_md *ctx, struct cfg *vcfg)
 	const u16 plen = ((data_end-data) > 1500 ? 1500 : (data_end-data));
 
 	struct ethhdr ethh = {
-		.h_proto = htons(ETH_P_IPV6)
+		.h_proto = bpf_htons(ETH_P_IPV6)
 	};
 	__builtin_memcpy(ethh.h_dest, vcfg->dmac, ETH_ALEN);
 	__builtin_memcpy(ethh.h_source, vcfg->smac, ETH_ALEN);
@@ -53,8 +53,8 @@ static inline int encap(struct xdp_md *ctx, struct cfg *vcfg)
 	__builtin_memcpy(&ipv6h.daddr, vcfg->daddr, 16);
 
 	struct {
-		struct in6_addr sid;
 		struct ipv6_sr_hdr srh;
+		struct in6_addr sid;
 	} srh_alloc = {0};
 	struct ipv6_sr_hdr *srh = &srh_alloc.srh;
 	*srh = (struct ipv6_sr_hdr){

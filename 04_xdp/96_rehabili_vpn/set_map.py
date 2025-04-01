@@ -40,4 +40,3 @@ if __name__ == "__main__":
     print(cmd)
 
     subprocess.run(cmd, shell=True, check=True)
-
