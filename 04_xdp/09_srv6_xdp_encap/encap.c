@@ -37,7 +37,6 @@ static inline int encap(struct xdp_md *ctx, struct cfg *vcfg)
 	u8 *data = (u8 *)(long)ctx->data;
 	const u16 plen = ((data_end-data) > 1500 ? 1500 : (data_end-data));
 
-
 	struct ethhdr ethh = {
 		.h_proto = htons(ETH_P_IPV6)
 	};
@@ -60,8 +59,8 @@ static inline int encap(struct xdp_md *ctx, struct cfg *vcfg)
 	struct ipv6_sr_hdr *srh = &srh_alloc.srh;
 	*srh = (struct ipv6_sr_hdr){
 		.nexthdr = 0x8f, // 0x8f(143)=Eth ref: RFC8986 Sec4.9
-		.type = 0x04, // SRH ref: RFC8754 Sec2	
 		.hdrlen = 0x02,
+		.type = 0x04, // SRH ref: RFC8754 Sec2	
 		.segments_left = 0x00, 
 		.first_segment = 0x00,
 		.flags = 0x00,

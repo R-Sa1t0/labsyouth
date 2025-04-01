@@ -12,14 +12,14 @@ env-up:
 	sudo ip -n N1 link set lo up
 	sudo ip -n N2 link set lo up
 	sudo ip -n R1 link set lo up
-	sudo ip link add C1-N1 netns C1 mtu 1426 type veth \
-		peer N1-C1 netns N1 mtu 1426
+	sudo ip link add C1-N1 netns C1 mtu 1422 type veth \
+		peer N1-C1 netns N1 mtu 1422
 	sudo ip link add N1-R1 netns N1 addr 12:a6:e0:4b:94:4a type veth \
 		peer R1-N1 netns R1 addr 66:aa:4b:a6:d6:ba
 	sudo ip link add R1-N2 netns R1 addr 12:a6:e0:4b:94:4a type veth \
 		peer N2-R1 netns N2 addr 66:aa:4b:a6:d6:ba
-	sudo ip link add C2-N2 netns C2 mtu 1426 type veth \
-		peer N2-C2 netns N2 mtu 1426
+	sudo ip link add C2-N2 netns C2 mtu 1422 type veth \
+		peer N2-C2 netns N2 mtu 1422
 	sudo ip -n N1 link set N1-R1 up
 	sudo ip -n R1 link set R1-N1 up
 	sudo ip -n R1 link set R1-N2 up
@@ -94,7 +94,6 @@ check:
 	sudo ls -lah /sys/fs/bpf
 	sudo bpftool prog list name xdp_vpn
 	sudo bpftool map dump name vpn_cfg_map
-	sudo ip netns exec N2 tcpdump -vvvnnli N2-N1 | grep RT6
 
 log:
 	sudo cat /sys/kernel/debug/tracing/trace_pipe
