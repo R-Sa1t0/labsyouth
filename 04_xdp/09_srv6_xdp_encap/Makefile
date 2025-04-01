@@ -1,4 +1,5 @@
-all: detach clean encap.o attach
+all: env-down env-up env-test detach clean encap.o attach test
+build-test: clean encap.o
 
 env-up:
 	sudo ip netns add C1
@@ -87,8 +88,12 @@ detach:
 	sudo rm -rf /sys/fs/bpf/encap_n2 /sys/fs/bpf/encap_n2_cfg
 
 test: 
-	sudo ip netns exec N1 ping 10.0.0.2 -c 5
-	sudo ip netns exec N2 ping 10.0.0.1 -c 5
+	sudo ip netns exec C1 ping 10.0.0.2 -c 5
+	sudo ip netns exec C2 ping 10.0.0.1 -c 5
+	sudo ip netns exec C1 iperf3 -s -i 0 --one-off > /dev/null 2>&1 & \
+		sudo ip netns exec C2 iperf3 -i 0 -c 10.0.0.1 
+	sudo ip netns exec C1 iperf3 -s -i 0 --one-off > /dev/null 2>&1 & \
+		sudo ip netns exec C2 iperf3 -i 0 -u -b 400G -c 10.0.0.1 
 
 check:
 	sudo ls -lah /sys/fs/bpf
