@@ -53,8 +53,8 @@ static inline int encap(struct xdp_md *ctx, struct cfg *vcfg)
 	__builtin_memcpy(&ipv6h.daddr, vcfg->daddr, 16);
 
 	struct {
-		struct ipv6_sr_hdr srh;
 		struct in6_addr sid;
+		struct ipv6_sr_hdr srh;
 	} srh_alloc = {0};
 	struct ipv6_sr_hdr *srh = &srh_alloc.srh;
 	*srh = (struct ipv6_sr_hdr){
