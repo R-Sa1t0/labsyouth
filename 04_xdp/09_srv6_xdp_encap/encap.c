@@ -52,11 +52,13 @@ static inline int encap(struct xdp_md *ctx, struct cfg *vcfg)
 	__builtin_memcpy(&ipv6h.saddr, vcfg->saddr, 16);
 	__builtin_memcpy(&ipv6h.daddr, vcfg->daddr, 16);
 
-	struct {
-		struct ipv6_sr_hdr srh;
-		struct in6_addr sid;
-	} srh_alloc = {0};
-	struct ipv6_sr_hdr *srh = &srh_alloc.srh;
+//	struct {
+//		struct ipv6_sr_hdr srh;
+//		struct in6_addr sid;
+//	} srh_alloc = {0};
+
+	_Alignas(16) char srh_alloc [sizeof(struct ipv6_sr_hdr) + sizeof (struct in6_addr)];
+	struct ipv6_sr_hdr *srh = (struct ipv6_sr_hdr*)srh_alloc;
 	*srh = (struct ipv6_sr_hdr){
 		.nexthdr = 0x8f, // 0x8f(143)=Eth ref: RFC8986 Sec4.9
 		.hdrlen = 0x02,
@@ -86,6 +88,7 @@ static inline int encap(struct xdp_md *ctx, struct cfg *vcfg)
 		> data_end){
 		return XDP_ABORTED;
 	}
+
 	u8 *hdr_p = data;
 	__builtin_memcpy(hdr_p, &ethh, sizeof(ethh));
 	hdr_p += sizeof(ethh);
