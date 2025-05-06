@@ -56,18 +56,24 @@ env-test:
 	sudo ip netns exec N2 ping fc00:1::2 -c 5
 
 seg6_vpn.o:  seg6_vpn.c
-	clang -O2 -g -target bpf -c seg6_vpn.c -o seg6_vpn.o -Wall -Wextra -I/usr/include/aarch64-linux-gnu
+	clang -O2 -g -target bpf -c seg6_vpn.c -o seg6_vpn.o -Wall -Wextra -I/usr/include/x86_64-linux-gnu
 
 clean:
 	rm -f *.o *.ll
 
 attach:
 	sudo bpftool prog load ./seg6_vpn.o /sys/fs/bpf/seg6_vpn_n1 type xdp pinmaps /sys/fs/bpf/seg6_vpn_n1_cfg
+	sudo ./set_map.py --map /sys/fs/bpf/seg6_vpn_n1_cfg/seg6vpn_cfg_map --ifidx-wan 3 --ifidx-lan 2 \
+		--smac 12:a6:e0:4b:94:4a --dmac 66:aa:4b:a6:d6:ba \
+		--saddr fc00:1::2 --daddr fd00:2::1 --sid fd00:2::1 --dsid fd00:1::1
 	sudo ip netns exec N1 bpftool net attach xdpgeneric id \
 		$$(sudo bpftool prog show pinned /sys/fs/bpf/seg6_vpn_n1 | grep -o '^[0-9]\+') dev N1-C1
 	sudo ip netns exec N1 bpftool net attach xdpgeneric id \
 		$$(sudo bpftool prog show pinned /sys/fs/bpf/seg6_vpn_n1 | grep -o '^[0-9]\+') dev N1-R1
-	sudo bpftool prog load ./seg6_vpn.o /sys/fs/bpf/seg6_vpn_n2 type xdp pinmaps /sys/fs/bpf/seg6_vpn_n2_cfg	
+	sudo bpftool prog load ./seg6_vpn.o /sys/fs/bpf/seg6_vpn_n2 type xdp pinmaps /sys/fs/bpf/seg6_vpn_n2_cfg
+	sudo ./set_map.py --map /sys/fs/bpf/seg6_vpn_n2_cfg/seg6vpn_cfg_map --ifidx-wan 2 --ifidx-lan 3 \
+		--dmac 12:a6:e0:4b:94:4a --smac 66:aa:4b:a6:d6:ba \
+		--saddr fc00:2::2 --daddr fd00:1::1 --sid fd00:1::1 --dsid fd00:2::1
 	sudo ip netns exec N2 bpftool net attach xdpgeneric id \
 		$$(sudo bpftool prog show pinned /sys/fs/bpf/seg6_vpn_n2 | grep -o '^[0-9]\+') dev N2-R1
 	sudo ip netns exec N2 bpftool net attach xdpgeneric id \

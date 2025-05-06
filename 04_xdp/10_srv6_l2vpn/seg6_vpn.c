@@ -19,7 +19,7 @@ struct {
 	__uint(max_entries, 1);
 	__type(key, u8);
 	__type(value, struct cfg);
-} encap_cfg_map SEC(".maps");
+} seg6vpn_cfg_map SEC(".maps");
 
 struct cfg {
 	u32 ifidx_wan;
@@ -32,29 +32,138 @@ struct cfg {
 	u8 d_sid[16];
 };
 
-static inline void dbg_printpkt(struct xdp_md *ctx) {
+static inline void dbg(const struct xdp_md *ctx) {
 	bpf_printk("ingress_ifidx: %lu\n", ctx->ingress_ifindex);
+}
+
+static inline void hex_dump(const char *name, const void *_head, size_t len) {
+	bpf_printk("%s = ", name);
+
+	const u8 *head = (const u8 *)_head;
+	for (size_t i=0; i<len; i++) {
+		bpf_printk("%02x ", head[i]);
+	}	
+	bpf_printk("\n");
 }
 
 static inline int encap(struct xdp_md *ctx, struct cfg *vcfg)
 {
-	return XDP_PASS;
+	u8 *data_end = (u8 *)(long)ctx->data_end;
+	u8 *data = (u8 *)(long)ctx->data;
+	const u16 plen = ((data_end)-data) > 1500 ? 1500 : (data_end-data);
+
+	struct ethhdr ethh = {
+		.h_proto = bpf_htons(ETH_P_IPV6)
+	};
+	__builtin_memcpy(ethh.h_dest, vcfg->e_dmac, ETH_ALEN);
+	__builtin_memcpy(ethh.h_source, vcfg->e_smac, ETH_ALEN);
+
+	struct ipv6hdr ipv6h = {
+		.version = 6,
+		.flow_lbl = {0x00, 0x00, 0x00},
+		.nexthdr = IPPROTO_ROUTING,
+		.hop_limit = 63,
+	};
+	__builtin_memcpy(&ipv6h.saddr, vcfg->e_saddr, 16);
+	__builtin_memcpy(&ipv6h.daddr, vcfg->e_daddr, 16);
+
+	_Alignas(16) char srh_alloc [sizeof(struct ipv6_sr_hdr) + sizeof (struct in6_addr)];	
+	struct ipv6_sr_hdr *srh = (struct ipv6_sr_hdr*)srh_alloc;
+	*srh = (struct ipv6_sr_hdr){
+		.nexthdr = 0x8f, // 0x8f(143)=Eth ref: RFC8986 Sec4.9
+		.hdrlen = 0x02,
+		.type = 0x04,
+		.segments_left = 0x00,
+		.first_segment = 0x00,
+		.flags = 0x00,
+		.tag = 0x00,
+	};
+	__builtin_memcpy(&srh->segments[0], &vcfg->e_sid, 16);
+	ipv6h.payload_len = bpf_htons(plen+(u16)(sizeof srh_alloc));
+
+	if (bpf_xdp_adjust_head(ctx,0
+			- (int)sizeof(struct ethhdr)
+			- (int)sizeof(struct ipv6hdr)
+			- (int)sizeof(srh_alloc)
+			)){
+		return XDP_ABORTED;
+	}
+	data_end = (u8 *)(long)ctx->data_end;
+	data = (u8 *)(long)ctx->data;
+	if ( data + (int)sizeof(struct ethhdr)
+			+ (int)sizeof(struct ipv6hdr)
+			+ (int)sizeof(srh_alloc)
+			> data_end){
+		return XDP_ABORTED;
+	}
+
+	u8 *hdr_p = data;
+	__builtin_memcpy(hdr_p, &ethh, sizeof(ethh));
+	hdr_p += sizeof(ethh);
+	__builtin_memcpy(hdr_p, &ipv6h, sizeof(ipv6h));
+	hdr_p += sizeof(ipv6h);
+	__builtin_memcpy(hdr_p, &srh_alloc, sizeof(srh_alloc));
+
+	bpf_redirect(vcfg->ifidx_wan, 0);
+	return XDP_REDIRECT;
 }
 
 static inline int decap(struct xdp_md *ctx, struct cfg *vcfg)
 {
-	return XDP_PASS;
+	u8 *data_end = (u8 *)(long)ctx->data_end;
+	u8 *data = (u8 *)(long)ctx->data;	
+	_Alignas(16) char srh_alloc [sizeof(struct ipv6_sr_hdr) + sizeof (struct in6_addr)];
+	if (data + sizeof(struct ethhdr)
+			+ sizeof(struct ipv6hdr)
+			+ sizeof(srh_alloc)
+			> data_end){
+		return XDP_ABORTED;
+	}
+	u8 *buf_head = data;
+	bpf_trace_printk("x", 1);
+
+	struct ethhdr *ethh = (struct ethhdr *)buf_head;
+	if (ethh->h_proto != bpf_htons(ETH_P_IPV6)) {
+		return XDP_ABORTED;
+	}
+	buf_head += sizeof(struct ethhdr);
+	bpf_trace_printk("y", 1);	
+
+	struct ipv6hdr *ip6h = (struct ipv6hdr *)buf_head;
+	
+	hex_dump("ip6 daddr", &(ip6h->daddr), 16);
+	hex_dump("d_sid    ", vcfg->d_sid, 16);
+	if (__builtin_memcmp(&(ip6h->daddr), vcfg->d_sid, 16)) {
+		bpf_trace_printk("a",1);
+		dbg(ctx);
+		return XDP_ABORTED;
+	}
+	buf_head += sizeof(struct ipv6hdr);
+	bpf_trace_printk("b", 1);
+	
+	buf_head += sizeof(struct ipv6_sr_hdr);
+	struct in6_addr *dsid = (struct in6_addr *)buf_head;
+	if (__builtin_memcmp(dsid, vcfg->d_sid, 16)) {
+		return XDP_ABORTED;
+	}
+	buf_head += sizeof(struct in6_addr);
+
+	if (bpf_xdp_adjust_head(ctx, (buf_head-data))) {
+		return XDP_ABORTED;
+	}
+	bpf_redirect(vcfg->ifidx_lan, 0);
+
+	return XDP_REDIRECT;
 }
 
 SEC("xdp")
 int seg6_l2vpn(struct xdp_md *ctx)
 {
 	u8 key = 0;
-	struct cfg *vcfg = (struct cfg*)bpf_map_lookup_elem(&encap_cfg_map, &key);
+	struct cfg *vcfg = (struct cfg*)bpf_map_lookup_elem(&seg6vpn_cfg_map, &key);
 	char cfg_load_err[] = "configuration loading failure\n";
 	if (!vcfg) {
 		bpf_trace_printk(cfg_load_err, sizeof cfg_load_err);
-		dbg_printpkt(ctx);
 		return XDP_PASS;
 	}
 
@@ -64,6 +173,7 @@ int seg6_l2vpn(struct xdp_md *ctx)
 	} else if (ifidx == vcfg->ifidx_wan) {
 		return decap(ctx, vcfg);
 	}
+	return XDP_PASS;
 }
 
 char LICENSE[] SEC("license") = "Dual BSD/GPL";
