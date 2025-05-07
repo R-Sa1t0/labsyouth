@@ -13,6 +13,7 @@
 typedef uint8_t u8;
 typedef uint16_t u16;
 typedef uint32_t u32;
+typedef uint64_t u64;
 
 struct {
 	__uint(type, BPF_MAP_TYPE_HASH);
@@ -41,10 +42,14 @@ static inline void hex_dump(const char *name, const void *_head, size_t len) {
 
 	const u8 *head = (const u8 *)_head;
 	for (size_t i=0; i<len; i++) {
-		bpf_printk("%02x ", head[i]);
-	}	
-	bpf_printk("\n");
+		bpf_trace_printk("%02x ",sizeof("%02x "), head[i]);
+	}
 }
+
+static inline void in6addr_dump(const char *name, const void *in6addr){
+	bpf_printk("%s = %pI6\n", name, in6addr);
+}
+
 
 static inline int encap(struct xdp_md *ctx, struct cfg *vcfg)
 {
@@ -66,6 +71,8 @@ static inline int encap(struct xdp_md *ctx, struct cfg *vcfg)
 	};
 	__builtin_memcpy(&ipv6h.saddr, vcfg->e_saddr, 16);
 	__builtin_memcpy(&ipv6h.daddr, vcfg->e_daddr, 16);
+	in6addr_dump("encap: dst addr ", vcfg->e_daddr);
+	in6addr_dump("encap: srv6 sid", vcfg->e_sid);
 
 	_Alignas(16) char srh_alloc [sizeof(struct ipv6_sr_hdr) + sizeof (struct in6_addr)];	
 	struct ipv6_sr_hdr *srh = (struct ipv6_sr_hdr*)srh_alloc;
@@ -86,7 +93,7 @@ static inline int encap(struct xdp_md *ctx, struct cfg *vcfg)
 			- (int)sizeof(struct ipv6hdr)
 			- (int)sizeof(srh_alloc)
 			)){
-		return XDP_ABORTED;
+		return XDP_PASS;
 	}
 	data_end = (u8 *)(long)ctx->data_end;
 	data = (u8 *)(long)ctx->data;
@@ -94,7 +101,7 @@ static inline int encap(struct xdp_md *ctx, struct cfg *vcfg)
 			+ (int)sizeof(struct ipv6hdr)
 			+ (int)sizeof(srh_alloc)
 			> data_end){
-		return XDP_ABORTED;
+		return XDP_PASS;
 	}
 
 	u8 *hdr_p = data;
@@ -117,42 +124,50 @@ static inline int decap(struct xdp_md *ctx, struct cfg *vcfg)
 			+ sizeof(struct ipv6hdr)
 			+ sizeof(srh_alloc)
 			> data_end){
-		return XDP_ABORTED;
+		return XDP_PASS;
 	}
 	u8 *buf_head = data;
 	bpf_trace_printk("x", 1);
 
 	struct ethhdr *ethh = (struct ethhdr *)buf_head;
 	if (ethh->h_proto != bpf_htons(ETH_P_IPV6)) {
-		return XDP_ABORTED;
+		return XDP_PASS;
 	}
 	buf_head += sizeof(struct ethhdr);
 	bpf_trace_printk("y", 1);	
 
 	struct ipv6hdr *ip6h = (struct ipv6hdr *)buf_head;
 	
-	hex_dump("ip6 daddr", &(ip6h->daddr), 16);
-	hex_dump("d_sid    ", vcfg->d_sid, 16);
+	in6addr_dump("decap: dst ipv6 addr ", &(ip6h->daddr));
+	in6addr_dump("decap: srv6 sid ", vcfg->d_sid);
+	hex_dump("decap: nexthdr: ", &(ip6h->nexthdr), 4);
+
+	bpf_printk("OK!!!!!!");
+// ここから下が悪い
 	if (__builtin_memcmp(&(ip6h->daddr), vcfg->d_sid, 16)) {
 		bpf_trace_printk("a",1);
 		dbg(ctx);
-		return XDP_ABORTED;
+		return XDP_PASS;
 	}
+
 	buf_head += sizeof(struct ipv6hdr);
 	bpf_trace_printk("b", 1);
-	
+	bpf_printk("O!");
 	buf_head += sizeof(struct ipv6_sr_hdr);
 	struct in6_addr *dsid = (struct in6_addr *)buf_head;
 	if (__builtin_memcmp(dsid, vcfg->d_sid, 16)) {
-		return XDP_ABORTED;
+		return XDP_PASS;
 	}
 	buf_head += sizeof(struct in6_addr);
+	bpf_printk("P!");
+
 
 	if (bpf_xdp_adjust_head(ctx, (buf_head-data))) {
-		return XDP_ABORTED;
+		return XDP_PASS;
 	}
-	bpf_redirect(vcfg->ifidx_lan, 0);
+	bpf_printk("Q!");
 
+	bpf_redirect(vcfg->ifidx_lan, 0);
 	return XDP_REDIRECT;
 }
 
@@ -172,6 +187,7 @@ int seg6_l2vpn(struct xdp_md *ctx)
 		return encap(ctx, vcfg);
 	} else if (ifidx == vcfg->ifidx_wan) {
 		return decap(ctx, vcfg);
+	return XDP_PASS;
 	}
 	return XDP_PASS;
 }
